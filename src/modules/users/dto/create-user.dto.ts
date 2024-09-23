@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsString } from 'class-validator';
+import { IsNotEmpty, IsOptional, IsString } from 'class-validator';
 import { UserRole } from '@src/modules/users/enums/user-role.enum';
 
 export class CreateUserDto {
@@ -10,8 +10,9 @@ export class CreateUserDto {
   @IsString()
   telegramId: string;
 
+  @IsOptional()
   @IsNotEmpty()
-  balance: number;
+  balance?: number;
 
   @IsNotEmpty()
   role: UserRole;
