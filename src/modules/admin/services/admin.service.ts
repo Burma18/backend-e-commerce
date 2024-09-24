@@ -32,7 +32,7 @@ export class AdminService {
     action: 'block' | 'unblock' | 'update',
     updateData?: Partial<User>,
   ) {
-    const user = await this.userService.findOne(userId);
+    const user = await this.userService.findOneById(userId);
     if (!user) {
       throw new NotFoundException(`User with ID ${userId} not found.`);
     }

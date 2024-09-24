@@ -8,6 +8,7 @@ import { OrderModule } from '../orders/orders.module';
 import { PaymentsModule } from '../payments/payments.module';
 import { NewsletterModule } from '../newsletter/newsletter.module';
 import { SupportModule } from '../support/support.module';
+import { AuthModule } from '../auth/auth.module';
 
 @Module({
   imports: [
@@ -18,8 +19,10 @@ import { SupportModule } from '../support/support.module';
     PaymentsModule,
     NewsletterModule,
     SupportModule,
+    AuthModule,
   ],
   controllers: [AdminController],
   providers: [AdminService],
+  exports: [AdminService],
 })
 export class AdminModule {}

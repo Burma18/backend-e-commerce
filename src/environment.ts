@@ -19,4 +19,5 @@ export const environment = {
   telegram: {
     telegramBotToken: env.get('TELEGRAM_BOT_TOKEN').required().asString(),
   },
+  jwtSecret: env.get('JWT_SECRET').required().asString(),
 };
