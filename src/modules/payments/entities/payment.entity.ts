@@ -7,7 +7,7 @@ import {
 } from 'typeorm';
 import { User } from '@src/modules/users/entities/user.entity';
 import { Order } from '@src/modules/orders/entities/order.entity';
-import { PaymentStatus } from '../enums/payment-status.enum';
+import { PaymentStatus } from '@src/modules/payments/enums/payment-status.enum';
 
 @Entity()
 export class Payment {
