@@ -6,15 +6,18 @@ import {
   Delete,
   Body,
   Param,
+  UseGuards,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { SupportService } from '../services/support.service';
 import { CreateSupportDto } from '../dto/create-support.dto';
 import { UpdateSupportDto } from '../dto/update-support.dto';
 import { Support } from '../entities/support.entity';
+import { AdminGuard } from '@src/modules/auth/guards/admin-guard';
 
-@ApiTags('support')
+@ApiTags('Support')
 @Controller('support')
+@UseGuards(AdminGuard)
 export class SupportController {
   constructor(private readonly supportService: SupportService) {}
 
@@ -74,6 +77,7 @@ export class SupportController {
   @ApiResponse({ status: 200, description: 'Support request deleted' })
   @ApiResponse({ status: 404, description: 'Support request not found' })
   @Delete(':id')
+  @UseGuards(AdminGuard)
   async deleteSupportRequest(@Param('id') id: number): Promise<void> {
     await this.supportService.remove(id);
   }

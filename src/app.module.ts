@@ -9,6 +9,8 @@ import { CategoriesModule } from './modules/categories/categories.module';
 import { NewsletterModule } from './modules/newsletter/newsletter.module';
 import { ProductsModule } from './modules/products/products.module';
 import { SupportModule } from './modules/support/support.module';
+import { APP_GUARD } from '@nestjs/core';
+import { JwtGuard } from './modules/auth/guards/jwt-guard';
 
 @Module({
   imports: [
@@ -23,6 +25,12 @@ import { SupportModule } from './modules/support/support.module';
     NewsletterModule,
     ProductsModule,
     SupportModule,
+  ],
+  providers: [
+    {
+      provide: APP_GUARD,
+      useClass: JwtGuard,
+    },
   ],
 })
 export class AppModule {}

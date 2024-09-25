@@ -6,14 +6,16 @@ import {
   Param,
   Put,
   Delete,
+  UseGuards,
 } from '@nestjs/common';
 import { ApiTags, ApiResponse, ApiOperation } from '@nestjs/swagger';
 import { UserService } from '@src/modules/users/services/user.service';
 import { CreateUserDto } from '@src/modules/users/dto/create-user.dto';
 import { UpdateUserDto } from '@src/modules/users/dto/update-user.dto';
 import { User } from '@src/modules/users/entities/user.entity';
+import { AdminGuard } from '@src/modules/auth/guards/admin-guard';
 
-@ApiTags('users')
+@ApiTags('Users')
 @Controller('users')
 export class UserController {
   constructor(private readonly userService: UserService) {}
@@ -26,6 +28,7 @@ export class UserController {
   })
   @ApiResponse({ status: 400, description: 'Validation failed' })
   @Post()
+  @UseGuards(AdminGuard)
   create(@Body() createUserDto: CreateUserDto) {
     return this.userService.create(createUserDto);
   }
@@ -33,6 +36,7 @@ export class UserController {
   @ApiOperation({ summary: 'Get all users' })
   @ApiResponse({ status: 200, description: 'List of users', type: [User] })
   @Get()
+  @UseGuards(AdminGuard)
   findAll() {
     return this.userService.findAll();
   }
@@ -61,6 +65,7 @@ export class UserController {
   @ApiResponse({ status: 200, description: 'User deleted successfully' })
   @ApiResponse({ status: 404, description: 'User not found' })
   @Delete(':id')
+  @UseGuards(AdminGuard)
   remove(@Param('id') id: number) {
     return this.userService.remove(id);
   }

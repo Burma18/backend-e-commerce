@@ -6,6 +6,7 @@ import {
   Delete,
   Param,
   Body,
+  UseGuards,
 } from '@nestjs/common';
 import { OrderService } from '@src/modules/orders/services/order.service';
 import { Order } from '@src/modules/orders/entities/order.entity';
@@ -18,6 +19,7 @@ import {
   ApiBody,
   ApiParam,
 } from '@nestjs/swagger';
+import { AdminGuard } from '@src/modules/auth/guards/admin-guard';
 
 @ApiTags('Orders')
 @Controller('orders')
@@ -27,6 +29,7 @@ export class OrderController {
   @ApiOperation({ summary: 'Get all orders' })
   @ApiResponse({ status: 200, description: 'Orders retrieved successfully.' })
   @Get()
+  @UseGuards(AdminGuard)
   async getAllOrders(): Promise<Order[]> {
     return this.orderService.findAll();
   }

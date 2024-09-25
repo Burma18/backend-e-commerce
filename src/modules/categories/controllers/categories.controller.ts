@@ -9,6 +9,7 @@ import {
   NotFoundException,
   HttpCode,
   HttpStatus,
+  UseGuards,
 } from '@nestjs/common';
 import { CategoryService } from '../services/category.service';
 import { CreateCategoryDto } from '../dto/create-category.dto';
@@ -21,9 +22,11 @@ import {
   ApiParam,
   ApiBody,
 } from '@nestjs/swagger';
+import { AdminGuard } from '@src/modules/auth/guards/admin-guard';
 
 @ApiTags('Categories')
 @Controller('categories')
+@UseGuards(AdminGuard)
 export class CategoryController {
   constructor(private readonly categoryService: CategoryService) {}
 

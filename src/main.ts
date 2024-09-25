@@ -12,6 +12,7 @@ async function bootstrap() {
     .setTitle('UniShop Telegram Bot Api')
     .setDescription('The API description of the Telegram bot services')
     .setVersion('1.0')
+    .addBearerAuth()
     .build();
 
   const document = SwaggerModule.createDocument(app, config);

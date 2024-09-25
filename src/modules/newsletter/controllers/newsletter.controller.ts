@@ -6,14 +6,17 @@ import {
   Param,
   Put,
   Delete,
+  UseGuards,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { CreateNewsletterDto } from '../dto/create-newsletter.dto';
 import { NewsletterService } from '../services/newsletter.service';
 import { Newsletter } from '../entities/newsletter.entity';
+import { AdminGuard } from '@src/modules/auth/guards/admin-guard';
 
-@ApiTags('newsletters')
+@ApiTags('Newsletters')
 @Controller('newsletters')
+@UseGuards(AdminGuard)
 export class NewsletterController {
   constructor(private readonly newsletterService: NewsletterService) {}
 
