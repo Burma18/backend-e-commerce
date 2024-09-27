@@ -5,7 +5,7 @@ import { AuthService } from './services/auth.service';
 import { environment } from '@src/environment';
 import { AuthController } from './controllers/auth.controller';
 import { JwtGuard } from './guards/jwt-guard';
-import { AdminGuard } from './guards/admin-guard';
+import { RolesGuard } from './guards/roles-guard';
 
 @Global()
 @Module({
@@ -16,7 +16,7 @@ import { AdminGuard } from './guards/admin-guard';
       signOptions: { expiresIn: '24h' },
     }),
   ],
-  providers: [AuthService, JwtGuard, AdminGuard],
+  providers: [AuthService, JwtGuard, RolesGuard],
   controllers: [AuthController],
   exports: [AuthService],
 })

@@ -1,5 +1,4 @@
 import {
-  Controller,
   Get,
   Post,
   Put,
@@ -16,22 +15,30 @@ import { CreateCategoryDto } from '../dto/create-category.dto';
 import { UpdateCategoryDto } from '../dto/update-category.dto';
 import { Category } from '@src/modules/categories/entities/category.entity';
 import {
-  ApiTags,
   ApiOperation,
-  ApiResponse,
   ApiParam,
   ApiBody,
+  ApiBearerAuth,
 } from '@nestjs/swagger';
-import { AdminGuard } from '@src/modules/auth/guards/admin-guard';
+import { RolesGuard } from '@src/modules/auth/guards/roles-guard';
+import { AllowedRoles } from '@src/common/decorators/allowed-roles.decorator';
+import { Roles } from '@src/common/enums/roles.enum';
+import { AdminController } from '@src/common/decorators/admin-controller.decorator';
+import { ApiResponseDecorator } from '@src/common/decorators/api-response.decorator';
 
-@ApiTags('Categories')
-@Controller('categories')
-@UseGuards(AdminGuard)
+@ApiBearerAuth()
+@AllowedRoles([Roles.ADMIN])
+@UseGuards(RolesGuard)
+@AdminController({ routePrefix: 'category', tagName: 'Category' })
 export class CategoryController {
   constructor(private readonly categoryService: CategoryService) {}
 
   @ApiOperation({ summary: 'Get all categories' })
-  @ApiResponse({ status: 200, description: 'List of categories' })
+  @ApiResponseDecorator([
+    { code: HttpStatus.OK, options: { type: Category } },
+    HttpStatus.UNAUTHORIZED,
+    HttpStatus.FORBIDDEN,
+  ])
   @Get()
   async findAll(): Promise<Category[]> {
     return this.categoryService.findAll();
@@ -39,8 +46,12 @@ export class CategoryController {
 
   @ApiOperation({ summary: 'Get a category by ID' })
   @ApiParam({ name: 'id', description: 'Category ID' })
-  @ApiResponse({ status: 200, description: 'Category found' })
-  @ApiResponse({ status: 404, description: 'Category not found' })
+  @ApiResponseDecorator([
+    { code: HttpStatus.OK, options: { type: Category } },
+    HttpStatus.UNAUTHORIZED,
+    HttpStatus.NOT_FOUND,
+    HttpStatus.FORBIDDEN,
+  ])
   @Get(':id')
   async findOne(@Param('id') id: number): Promise<Category> {
     const category = await this.categoryService.findOne(id);
@@ -52,8 +63,11 @@ export class CategoryController {
 
   @ApiOperation({ summary: 'Create a new category' })
   @ApiBody({ type: CreateCategoryDto })
-  @ApiResponse({ status: 201, description: 'Category created' })
-  @HttpCode(HttpStatus.CREATED)
+  @ApiResponseDecorator([
+    { code: HttpStatus.OK, options: { type: Category } },
+    HttpStatus.UNAUTHORIZED,
+    HttpStatus.FORBIDDEN,
+  ])
   @Post()
   async create(
     @Body() createCategoryDto: CreateCategoryDto,
@@ -63,9 +77,12 @@ export class CategoryController {
 
   @ApiOperation({ summary: 'Update a category' })
   @ApiParam({ name: 'id', description: 'Category ID' })
-  @ApiBody({ type: UpdateCategoryDto })
-  @ApiResponse({ status: 200, description: 'Category updated' })
-  @ApiResponse({ status: 404, description: 'Category not found' })
+  @ApiResponseDecorator([
+    { code: HttpStatus.OK, options: { type: Category } },
+    HttpStatus.UNAUTHORIZED,
+    HttpStatus.NOT_FOUND,
+    HttpStatus.FORBIDDEN,
+  ])
   @Put(':id')
   async update(
     @Param('id') id: number,
@@ -80,8 +97,12 @@ export class CategoryController {
 
   @ApiOperation({ summary: 'Delete a category' })
   @ApiParam({ name: 'id', description: 'Category ID' })
-  @ApiResponse({ status: 204, description: 'Category deleted' })
-  @ApiResponse({ status: 404, description: 'Category not found' })
+  @ApiResponseDecorator([
+    { code: HttpStatus.OK, options: { type: Category } },
+    HttpStatus.UNAUTHORIZED,
+    HttpStatus.NOT_FOUND,
+    HttpStatus.FORBIDDEN,
+  ])
   @HttpCode(HttpStatus.NO_CONTENT)
   @Delete(':id')
   async delete(@Param('id') id: number): Promise<void> {

@@ -1,72 +1,40 @@
-import {
-  Controller,
-  Get,
-  Post,
-  Body,
-  Param,
-  Put,
-  Delete,
-  UseGuards,
-} from '@nestjs/common';
-import { ApiTags, ApiResponse, ApiOperation } from '@nestjs/swagger';
+import { Body, Get, HttpStatus, Put } from '@nestjs/common';
+import { ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { UserService } from '@src/modules/users/services/user.service';
-import { CreateUserDto } from '@src/modules/users/dto/create-user.dto';
 import { UpdateUserDto } from '@src/modules/users/dto/update-user.dto';
 import { User } from '@src/modules/users/entities/user.entity';
-import { AdminGuard } from '@src/modules/auth/guards/admin-guard';
+import { WebController } from '@src/common/decorators/web-controller.decorator';
+import { GetJwtPayload } from '@src/common/decorators/get-jwt-payload.decorator';
+import { IJwtPayload } from '@src/common/interaces/jwt-payload.interface';
+import { ApiResponseDecorator } from '@src/common/decorators/api-response.decorator';
 
-@ApiTags('Users')
-@Controller('users')
+@ApiBearerAuth()
+@WebController({ routePrefix: 'user', tagName: 'User' })
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
-  @ApiOperation({ summary: 'Create a new user' })
-  @ApiResponse({
-    status: 201,
-    description: 'User created successfully',
-    type: User,
-  })
-  @ApiResponse({ status: 400, description: 'Validation failed' })
-  @Post()
-  @UseGuards(AdminGuard)
-  create(@Body() createUserDto: CreateUserDto) {
-    return this.userService.create(createUserDto);
+  @ApiOperation({ summary: 'Get me' })
+  @ApiResponseDecorator([
+    { code: HttpStatus.OK, options: { type: User } },
+    HttpStatus.UNAUTHORIZED,
+    HttpStatus.NOT_FOUND,
+  ])
+  @Get('me')
+  async getMe(@GetJwtPayload() user: IJwtPayload): Promise<User> {
+    return this.userService.getMe(user.id);
   }
 
-  @ApiOperation({ summary: 'Get all users' })
-  @ApiResponse({ status: 200, description: 'List of users', type: [User] })
-  @Get()
-  @UseGuards(AdminGuard)
-  findAll() {
-    return this.userService.findAll();
-  }
-
-  @ApiOperation({ summary: 'Get user by ID' })
-  @ApiResponse({ status: 200, description: 'User details', type: User })
-  @ApiResponse({ status: 404, description: 'User not found' })
-  @Get(':id')
-  findOne(@Param('id') id: number) {
-    return this.userService.findOneById(id);
-  }
-
-  @ApiOperation({ summary: 'Update user details' })
-  @ApiResponse({
-    status: 200,
-    description: 'User updated successfully',
-    type: User,
-  })
-  @ApiResponse({ status: 404, description: 'User not found' })
-  @Put(':id')
-  update(@Param('id') id: number, @Body() updateUserDto: UpdateUserDto) {
-    return this.userService.update(id, updateUserDto);
-  }
-
-  @ApiOperation({ summary: 'Delete user by ID' })
-  @ApiResponse({ status: 200, description: 'User deleted successfully' })
-  @ApiResponse({ status: 404, description: 'User not found' })
-  @Delete(':id')
-  @UseGuards(AdminGuard)
-  remove(@Param('id') id: number) {
-    return this.userService.remove(id);
+  @ApiOperation({ summary: 'Update me' })
+  @ApiResponseDecorator([
+    { code: HttpStatus.OK, options: { type: User } },
+    HttpStatus.NOT_FOUND,
+    HttpStatus.UNAUTHORIZED,
+  ])
+  @Put('me')
+  update(
+    @GetJwtPayload() user: IJwtPayload,
+    @Body() updateUserDto: UpdateUserDto,
+  ) {
+    return this.userService.updateMe(user.id, updateUserDto);
   }
 }

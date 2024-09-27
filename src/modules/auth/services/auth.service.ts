@@ -33,7 +33,7 @@ export class AuthService {
   async validateToken(token: string) {
     try {
       const decoded = this.jwtService.verify(token);
-      const user = await this.userService.findOneById(decoded.id);
+      const user = await this.userService.findOneBy({ id: decoded.id });
       return user;
     } catch (error) {
       throw new UnauthorizedException('Invalid or expired token');

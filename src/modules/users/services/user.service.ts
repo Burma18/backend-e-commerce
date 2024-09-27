@@ -1,10 +1,11 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectEntityManager } from '@nestjs/typeorm';
-import { Between, EntityManager, Repository } from 'typeorm';
+import { Between, EntityManager, FindOptionsWhere, Repository } from 'typeorm';
 import { User } from '@src/modules/users/entities/user.entity';
 import { CreateUserDto } from '@src/modules/users/dto/create-user.dto';
 import { UpdateUserDto } from '@src/modules/users/dto/update-user.dto';
 import { Payment } from '@src/modules/payments/entities/payment.entity';
+import { plainToInstance } from 'class-transformer';
 
 @Injectable()
 export class UserService {
@@ -27,8 +28,13 @@ export class UserService {
     return this.repository.find();
   }
 
-  async findOneById(id: number): Promise<User | null> {
-    return this.repository.findOneBy({ id });
+  async findOneBy(options: FindOptionsWhere<User>): Promise<User> {
+    const user = await this.repository.findOneBy(options);
+
+    if (!user) {
+      throw new NotFoundException('User not found!');
+    }
+    return user;
   }
 
   async findByTelegramId(telegramId: string): Promise<User | null> {
@@ -37,18 +43,24 @@ export class UserService {
 
   async update(id: number, updateUserDto: UpdateUserDto): Promise<User | null> {
     await this.repository.update(id, updateUserDto);
-    return this.findOneById(id);
+    return this.findOneBy({ id });
   }
 
   async remove(id: number): Promise<void> {
     await this.repository.delete(id);
   }
 
-  async countUsers(): Promise<number> {
+  async getStatistics() {
+    const totalUsers = await this.countUsers();
+    const totalPurchases = await this.countPurchasesToday();
+    return { totalUsers, totalPurchases };
+  }
+
+  private async countUsers(): Promise<number> {
     return await this.repository.count();
   }
 
-  async countPurchasesToday(): Promise<number> {
+  private async countPurchasesToday(): Promise<number> {
     const today = new Date();
     const startOfDay = new Date(today.setHours(0, 0, 0, 0));
     const endOfDay = new Date(today.setHours(23, 59, 59, 999));
@@ -58,5 +70,20 @@ export class UserService {
         paymentDate: Between(startOfDay, endOfDay),
       },
     });
+  }
+
+  async updateMe(id: number, dto: UpdateUserDto): Promise<User> {
+    const existingUser = await this.findOneBy({ id });
+
+    await this.repository.update({ id }, dto);
+
+    return plainToInstance(User, {
+      ...existingUser,
+      ...dto,
+    });
+  }
+
+  async getMe(id: number): Promise<User> {
+    return this.findOneBy({ id });
   }
 }

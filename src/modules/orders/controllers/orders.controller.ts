@@ -1,43 +1,47 @@
 import {
-  Controller,
   Get,
   Post,
   Put,
   Delete,
   Param,
   Body,
-  UseGuards,
+  HttpStatus,
 } from '@nestjs/common';
 import { OrderService } from '@src/modules/orders/services/order.service';
 import { Order } from '@src/modules/orders/entities/order.entity';
 import { CreateOrderDto } from '../dto/create-order.dto';
 import { UpdateOrderDto } from '../dto/update-order.dto';
 import {
-  ApiTags,
   ApiOperation,
-  ApiResponse,
   ApiBody,
   ApiParam,
+  ApiBearerAuth,
 } from '@nestjs/swagger';
-import { AdminGuard } from '@src/modules/auth/guards/admin-guard';
+import { WebController } from '@src/common/decorators/web-controller.decorator';
+import { ApiResponseDecorator } from '@src/common/decorators/api-response.decorator';
 
-@ApiTags('Orders')
-@Controller('orders')
+@ApiBearerAuth()
+@WebController({ routePrefix: 'order', tagName: 'Order' })
 export class OrderController {
   constructor(private readonly orderService: OrderService) {}
 
   @ApiOperation({ summary: 'Get all orders' })
-  @ApiResponse({ status: 200, description: 'Orders retrieved successfully.' })
+  @ApiResponseDecorator([
+    { code: HttpStatus.OK, options: { type: Order } },
+    HttpStatus.UNAUTHORIZED,
+  ])
   @Get()
-  @UseGuards(AdminGuard)
   async getAllOrders(): Promise<Order[]> {
     return this.orderService.findAll();
   }
 
   @ApiOperation({ summary: 'Get an order by ID' })
   @ApiParam({ name: 'id', description: 'Order ID' })
-  @ApiResponse({ status: 200, description: 'Order retrieved successfully.' })
-  @ApiResponse({ status: 404, description: 'Order not found.' })
+  @ApiResponseDecorator([
+    { code: HttpStatus.OK, options: { type: Order } },
+    HttpStatus.UNAUTHORIZED,
+    HttpStatus.NOT_FOUND,
+  ])
   @Get(':id')
   async getOrderById(@Param('id') id: number): Promise<Order | null> {
     return this.orderService.findOne(id);
@@ -45,8 +49,11 @@ export class OrderController {
 
   @ApiOperation({ summary: 'Create a new order' })
   @ApiBody({ type: CreateOrderDto })
-  @ApiResponse({ status: 201, description: 'Order created successfully.' })
-  @ApiResponse({ status: 400, description: 'Invalid input data.' })
+  @ApiResponseDecorator([
+    { code: HttpStatus.OK, options: { type: Order } },
+    HttpStatus.UNAUTHORIZED,
+    HttpStatus.BAD_REQUEST,
+  ])
   @Post()
   async createOrder(
     @Body() createOrderDto: CreateOrderDto,
@@ -57,8 +64,11 @@ export class OrderController {
   @ApiOperation({ summary: 'Update an order by ID' })
   @ApiParam({ name: 'id', description: 'Order ID' })
   @ApiBody({ type: UpdateOrderDto })
-  @ApiResponse({ status: 200, description: 'Order updated successfully.' })
-  @ApiResponse({ status: 404, description: 'Order not found.' })
+  @ApiResponseDecorator([
+    { code: HttpStatus.OK, options: { type: Order } },
+    HttpStatus.UNAUTHORIZED,
+    HttpStatus.NOT_FOUND,
+  ])
   @Put(':id')
   async updateOrder(
     @Param('id') id: number,
@@ -69,8 +79,11 @@ export class OrderController {
 
   @ApiOperation({ summary: 'Delete an order by ID' })
   @ApiParam({ name: 'id', description: 'Order ID' })
-  @ApiResponse({ status: 200, description: 'Order deleted successfully.' })
-  @ApiResponse({ status: 404, description: 'Order not found.' })
+  @ApiResponseDecorator([
+    { code: HttpStatus.OK, options: { type: Order } },
+    HttpStatus.UNAUTHORIZED,
+    HttpStatus.NOT_FOUND,
+  ])
   @Delete(':id')
   async deleteOrder(@Param('id') id: number): Promise<void> {
     return this.orderService.delete(id);
