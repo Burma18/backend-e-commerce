@@ -15,6 +15,8 @@ import {
   Delete,
   UseGuards,
   HttpStatus,
+  ParseIntPipe,
+  Get,
 } from '@nestjs/common';
 import { RolesGuard } from '@src/modules/auth/guards/roles-guard';
 import { AllowedRoles } from '@src/common/decorators/allowed-roles.decorator';
@@ -30,6 +32,17 @@ import { Product } from '../entities/product.entity';
 export class ProductAdminController {
   constructor(private readonly productService: ProductService) {}
 
+  @Get()
+  @ApiOperation({ summary: 'Retrieve all products' })
+  @ApiResponseDecorator([
+    { code: HttpStatus.OK, options: { type: Product } },
+    HttpStatus.UNAUTHORIZED,
+    HttpStatus.FORBIDDEN,
+  ])
+  async findAll() {
+    return await this.productService.findAll();
+  }
+
   @Post()
   @ApiOperation({ summary: 'Create a new product' })
   @ApiResponseDecorator([
@@ -40,6 +53,19 @@ export class ProductAdminController {
   @ApiBody({ type: CreateProductDto })
   async create(@Body() createProductDto: CreateProductDto) {
     return await this.productService.createProduct(createProductDto);
+  }
+
+  @Get(':id')
+  @ApiOperation({ summary: 'Retrieve product by ID' })
+  @ApiResponseDecorator([
+    { code: HttpStatus.OK, options: { type: Product } },
+    HttpStatus.UNAUTHORIZED,
+    HttpStatus.NOT_FOUND,
+    HttpStatus.FORBIDDEN,
+  ])
+  @ApiParam({ name: 'id', description: 'The ID of the product', example: 1 })
+  async findById(@Param('id', ParseIntPipe) id: number) {
+    return await this.productService.findById(id);
   }
 
   @Put(':id')
@@ -57,7 +83,7 @@ export class ProductAdminController {
   })
   @ApiBody({ type: UpdateProductDto })
   async update(
-    @Param('id') id: number,
+    @Param('id', ParseIntPipe) id: number,
     @Body() updateProductDto: UpdateProductDto,
   ) {
     return await this.productService.update(id, updateProductDto);
@@ -75,7 +101,7 @@ export class ProductAdminController {
     description: 'The ID of the product to delete',
     example: 1,
   })
-  async delete(@Param('id') id: number) {
+  async delete(@Param('id', ParseIntPipe) id: number) {
     await this.productService.delete(id);
     return { message: 'Product deleted successfully' };
   }

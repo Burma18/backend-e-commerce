@@ -7,6 +7,7 @@ import {
   Param,
   UseGuards,
   HttpStatus,
+  ParseIntPipe,
 } from '@nestjs/common';
 import { ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { SupportService } from '../services/support.service';
@@ -45,8 +46,10 @@ export class SupportAdminController {
     HttpStatus.FORBIDDEN,
   ])
   @Get(':id')
-  async getSupportRequest(@Param('id') id: number): Promise<Support | null> {
-    return await this.supportService.findOneById(id);
+  async getSupportRequest(
+    @Param('id', ParseIntPipe) id: number,
+  ): Promise<Support> {
+    return await this.supportService.findOneBy({ id });
   }
 
   @ApiOperation({ summary: 'Create a new support request' })
@@ -72,7 +75,7 @@ export class SupportAdminController {
   ])
   @Put(':id')
   async updateSupportRequest(
-    @Param('id') id: number,
+    @Param('id', ParseIntPipe) id: number,
     @Body() updateSupportDto: UpdateSupportDto,
   ): Promise<Support | null> {
     return await this.supportService.update(id, updateSupportDto);

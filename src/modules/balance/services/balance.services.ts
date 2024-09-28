@@ -16,7 +16,7 @@ export class BalanceService {
     this.userRepository = this.entityManager.getRepository(User);
   }
 
-  async getUserBalance(userId: number): Promise<number> {
+  async getUserBalance(userId: number): Promise<{ balance: number }> {
     const user = await this.userRepository.findOne({
       where: { id: userId },
       relations: ['balances'],
@@ -26,10 +26,13 @@ export class BalanceService {
       throw new NotFoundException('User not found');
     }
 
-    return user.balance;
+    return { balance: user.balance };
   }
 
-  async addUserBalance(userId: number, amount: number): Promise<number> {
+  async addUserBalance(
+    userId: number,
+    amount: number,
+  ): Promise<{ balance: number }> {
     const user = await this.userRepository.findOne({ where: { id: userId } });
 
     if (!user) {
@@ -42,10 +45,12 @@ export class BalanceService {
     user.balance += amount;
     await this.userRepository.save(user);
 
-    return user.balance;
+    return { balance: user.balance };
   }
 
-  async getBalanceHistory(userId: number): Promise<Balance[]> {
+  async getBalanceHistory(
+    userId: number,
+  ): Promise<{ balanceHistory: Balance[] }> {
     const user = await this.userRepository.findOne({
       where: { id: userId },
       relations: ['balances'],
@@ -64,13 +69,15 @@ export class BalanceService {
       throw new NotFoundException('No balance history found for this user');
     }
 
-    return balanceHistory;
+    return { balanceHistory };
   }
 
-  async getAllBalanceHistory(): Promise<Balance[]> {
-    return this.repository.find({
+  async getAllBalanceHistory(): Promise<{ balanceHistory: Balance[] }> {
+    const balanceHistory = await this.repository.find({
       order: { addedAt: 'DESC' },
       relations: ['user'],
     });
+
+    return { balanceHistory };
   }
 }

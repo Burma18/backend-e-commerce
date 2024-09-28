@@ -12,6 +12,14 @@ export class JwtGuard implements CanActivate {
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest();
+
+    const excludedPaths = ['/api/v1/auth/start', '/api/v1/auth'];
+
+    console.log('request.cookies :', request.cookies);
+    if (excludedPaths.includes(request.url)) {
+      return true;
+    }
+
     const token = request.cookies['session'];
 
     if (!token) {

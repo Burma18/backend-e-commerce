@@ -1,8 +1,9 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectEntityManager } from '@nestjs/typeorm';
 import { EntityManager, Repository } from 'typeorm';
 import { Newsletter } from '@src/modules/newsletter/entities/newsletter.entity';
 import { CreateNewsletterDto } from '@src/modules/newsletter/dto/create-newsletter.dto';
+import { NewsletterStatus } from '../enum/newsletter-status.enum';
 
 @Injectable()
 export class NewsletterService {
@@ -24,15 +25,23 @@ export class NewsletterService {
     return await this.newsletterRepository.find();
   }
 
-  async findById(id: number): Promise<Newsletter | null> {
-    return await this.newsletterRepository.findOneBy({ id });
+  async findById(id: number): Promise<Newsletter> {
+    const newsletter = await this.newsletterRepository.findOneBy({ id });
+
+    if (!newsletter) {
+      throw new NotFoundException('Newsletter not found!');
+    }
+
+    return newsletter;
   }
 
-  async update(
-    id: number,
-    dto: CreateNewsletterDto,
-  ): Promise<Newsletter | null> {
-    await this.newsletterRepository.update(id, dto);
+  async update(id: number, dto: CreateNewsletterDto): Promise<Newsletter> {
+    const updatedNewsletterData = {
+      ...dto,
+      status: NewsletterStatus.EDITED,
+    };
+
+    await this.newsletterRepository.update(id, updatedNewsletterData);
     return this.findById(id);
   }
 

@@ -6,11 +6,7 @@ import {
   JoinColumn,
 } from 'typeorm';
 import { User } from '@src/modules/users/entities/user.entity';
-
-export enum NewsletterStatus {
-  SENT = 'SENT',
-  CANCELED = 'CANCELED',
-}
+import { NewsletterStatus } from '../enum/newsletter-status.enum';
 
 @Entity()
 export class Newsletter {
@@ -27,6 +23,7 @@ export class Newsletter {
   @Column({
     type: 'enum',
     enum: NewsletterStatus,
+    default: NewsletterStatus.CREATED,
   })
   status: NewsletterStatus;
 

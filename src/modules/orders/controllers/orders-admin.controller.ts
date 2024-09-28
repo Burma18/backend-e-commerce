@@ -1,4 +1,12 @@
-import { Get, Put, Delete, Param, Body, UseGuards } from '@nestjs/common';
+import {
+  Get,
+  Put,
+  Delete,
+  Param,
+  Body,
+  UseGuards,
+  ParseIntPipe,
+} from '@nestjs/common';
 import { OrderService } from '@src/modules/orders/services/order.service';
 import { Order } from '@src/modules/orders/entities/order.entity';
 import { UpdateOrderDto } from '../dto/update-order.dto';
@@ -36,7 +44,9 @@ export class OrderAdminController {
   @ApiResponse({ status: 404, description: 'Order not found.' })
   @ApiForbiddenResponse({ description: 'Access denied. Admins only.' })
   @Get(':id')
-  async getOrderById(@Param('id') id: number): Promise<Order | null> {
+  async getOrderById(
+    @Param('id', ParseIntPipe) id: number,
+  ): Promise<Order | null> {
     return this.orderService.findOne(id);
   }
 
@@ -48,7 +58,7 @@ export class OrderAdminController {
   @ApiForbiddenResponse({ description: 'Access denied. Admins only.' })
   @Put(':id')
   async updateOrder(
-    @Param('id') id: number,
+    @Param('id', ParseIntPipe) id: number,
     @Body() updateOrderDto: UpdateOrderDto,
   ): Promise<Order | null> {
     return this.orderService.update(id, updateOrderDto);

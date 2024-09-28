@@ -1,12 +1,12 @@
 import {
   Get,
-  Post,
   Body,
   Param,
   Put,
   Delete,
   UseGuards,
   HttpStatus,
+  ParseIntPipe,
 } from '@nestjs/common';
 import {
   ApiResponse,
@@ -15,7 +15,6 @@ import {
   ApiBearerAuth,
 } from '@nestjs/swagger';
 import { UserService } from '@src/modules/users/services/user.service';
-import { CreateUserDto } from '@src/modules/users/dto/create-user.dto';
 import { UpdateUserDto } from '@src/modules/users/dto/update-user.dto';
 import { User } from '@src/modules/users/entities/user.entity';
 import { RolesGuard } from '@src/modules/auth/guards/roles-guard';
@@ -30,17 +29,6 @@ import { ApiResponseDecorator } from '@src/common/decorators/api-response.decora
 @AdminController({ routePrefix: 'user', tagName: 'User' })
 export class UserAdminController {
   constructor(private readonly userService: UserService) {}
-
-  @ApiOperation({ summary: 'Create a new user' })
-  @ApiResponseDecorator([
-    { code: HttpStatus.OK, options: { type: User } },
-    HttpStatus.UNAUTHORIZED,
-    HttpStatus.FORBIDDEN,
-  ])
-  @Post()
-  create(@Body() createUserDto: CreateUserDto) {
-    return this.userService.create(createUserDto);
-  }
 
   @ApiOperation({ summary: 'Get all users' })
   @ApiResponse({ status: 200, description: 'List of users', type: [User] })
@@ -58,7 +46,7 @@ export class UserAdminController {
     HttpStatus.FORBIDDEN,
   ])
   @Get(':id')
-  findOne(@Param('id') id: number) {
+  findOne(@Param('id', ParseIntPipe) id: number) {
     return this.userService.findOneBy({ id });
   }
 
@@ -70,7 +58,10 @@ export class UserAdminController {
     HttpStatus.FORBIDDEN,
   ])
   @Put(':id')
-  update(@Param('id') id: number, @Body() updateUserDto: UpdateUserDto) {
+  update(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() updateUserDto: UpdateUserDto,
+  ) {
     return this.userService.update(id, updateUserDto);
   }
 
@@ -82,7 +73,7 @@ export class UserAdminController {
     HttpStatus.FORBIDDEN,
   ])
   @Delete(':id')
-  remove(@Param('id') id: number) {
+  remove(@Param('id', ParseIntPipe) id: number) {
     return this.userService.remove(id);
   }
 

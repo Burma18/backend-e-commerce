@@ -1,12 +1,12 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectEntityManager } from '@nestjs/typeorm';
 import { EntityManager, Repository } from 'typeorm';
 import { Order } from '@src/modules/orders/entities/order.entity';
 import { CreateOrderDto } from '../dto/create-order.dto';
 import { UpdateOrderDto } from '../dto/update-order.dto';
-import { OrderItem } from '@src/modules/orders/entities/order-item.entity';
 import { OrderItemDto } from '../dto/order-item.dto';
-
+import { OrderItem } from '../entities/order-item.entity';
+import { Product } from '@src/modules/products/entities/product.entity';
 @Injectable()
 export class OrderService {
   private repository: Repository<Order>;
@@ -31,21 +31,45 @@ export class OrderService {
     });
   }
 
+  async create(createOrderDto: CreateOrderDto): Promise<Order> {
+    const orderItems = this.mapOrderItems(createOrderDto.orderItems);
+
+    const totalPrice = await this.calculateTotalPrice(orderItems);
+
+    const newOrder = this.entityManager.create(Order, {
+      totalPrice,
+      orderItems,
+    });
+
+    return this.repository.save(newOrder);
+  }
+
   private mapOrderItems(orderItemsDto: OrderItemDto[]): OrderItem[] {
     return orderItemsDto.map((itemDto) => {
       const orderItem = new OrderItem();
-      orderItem.product = { id: itemDto.productId } as any;
+      orderItem.product = { id: itemDto.productId } as Product;
       orderItem.quantity = itemDto.quantity;
       return orderItem;
     });
   }
 
-  async create(createOrderDto: CreateOrderDto): Promise<Order> {
-    const newOrder = this.entityManager.create(Order, {
-      totalPrice: createOrderDto.totalPrice,
-      orderItems: this.mapOrderItems(createOrderDto.orderItems),
-    });
-    return this.repository.save(newOrder);
+  private async calculateTotalPrice(orderItems: OrderItem[]): Promise<number> {
+    let total = 0;
+
+    for (const item of orderItems) {
+      const product = await this.entityManager.findOne(Product, {
+        where: { id: item.product.id },
+      });
+      if (product) {
+        total += product.price * item.quantity;
+      } else {
+        throw new NotFoundException(
+          `Product with ID ${item.product.id} not found`,
+        );
+      }
+    }
+
+    return total;
   }
 
   async update(
@@ -53,21 +77,18 @@ export class OrderService {
     updateOrderDto: UpdateOrderDto,
   ): Promise<Order | null> {
     const order = await this.findOne(id);
-    if (!order) return null;
-
-    if (updateOrderDto.totalPrice !== undefined) {
-      order.totalPrice = updateOrderDto.totalPrice;
-    }
+    if (!order) throw new NotFoundException(`Order with ID ${id} not found`);
 
     if (updateOrderDto.orderItems) {
       order.orderItems = this.mapOrderItems(updateOrderDto.orderItems);
+      order.totalPrice = await this.calculateTotalPrice(order.orderItems);
     }
 
     if (updateOrderDto.status) {
       order.status = updateOrderDto.status;
     }
 
-    return this.repository.save(order);
+    return await this.repository.save(order);
   }
 
   async delete(id: number): Promise<void> {

@@ -7,6 +7,7 @@ import {
   Delete,
   UseGuards,
   HttpStatus,
+  ParseIntPipe,
 } from '@nestjs/common';
 import { ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { CreateNewsletterDto } from '../dto/create-newsletter.dto';
@@ -59,7 +60,9 @@ export class NewsletterController {
     HttpStatus.FORBIDDEN,
   ])
   @Get(':id')
-  async findById(@Param('id') id: number): Promise<Newsletter | null> {
+  async findById(
+    @Param('id', ParseIntPipe) id: number,
+  ): Promise<Newsletter | null> {
     return await this.newsletterService.findById(id);
   }
 
@@ -72,7 +75,7 @@ export class NewsletterController {
   ])
   @Put(':id')
   async update(
-    @Param('id') id: number,
+    @Param('id', ParseIntPipe) id: number,
     @Body() createNewsletterDto: CreateNewsletterDto,
   ): Promise<Newsletter | null> {
     return await this.newsletterService.update(id, createNewsletterDto);

@@ -6,6 +6,7 @@ import {
   Param,
   Body,
   HttpStatus,
+  ParseIntPipe,
 } from '@nestjs/common';
 import { OrderService } from '@src/modules/orders/services/order.service';
 import { Order } from '@src/modules/orders/entities/order.entity';
@@ -43,7 +44,9 @@ export class OrderController {
     HttpStatus.NOT_FOUND,
   ])
   @Get(':id')
-  async getOrderById(@Param('id') id: number): Promise<Order | null> {
+  async getOrderById(
+    @Param('id', ParseIntPipe) id: number,
+  ): Promise<Order | null> {
     return this.orderService.findOne(id);
   }
 
@@ -55,9 +58,7 @@ export class OrderController {
     HttpStatus.BAD_REQUEST,
   ])
   @Post()
-  async createOrder(
-    @Body() createOrderDto: CreateOrderDto,
-  ): Promise<Order | null> {
+  async createOrder(@Body() createOrderDto: CreateOrderDto): Promise<Order> {
     return this.orderService.create(createOrderDto);
   }
 
@@ -71,7 +72,7 @@ export class OrderController {
   ])
   @Put(':id')
   async updateOrder(
-    @Param('id') id: number,
+    @Param('id', ParseIntPipe) id: number,
     @Body() updateOrderDto: UpdateOrderDto,
   ): Promise<Order | null> {
     return this.orderService.update(id, updateOrderDto);

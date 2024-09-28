@@ -6,9 +6,9 @@ import {
   OneToMany,
 } from 'typeorm';
 import { User } from '@src/modules/users/entities/user.entity';
-import { OrderItem } from '@src/modules/orders/entities/order-item.entity';
 import { OrderStatus } from '@src/modules/orders/enums/order-status.enum';
 import { Payment } from '@src/modules/payments/entities/payment.entity';
+import { OrderItem } from './order-item.entity';
 
 @Entity('orders')
 export class Order {

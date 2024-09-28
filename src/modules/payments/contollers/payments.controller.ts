@@ -1,4 +1,12 @@
-import { Get, Post, Put, Param, Body, HttpStatus } from '@nestjs/common';
+import {
+  Get,
+  Post,
+  Put,
+  Param,
+  Body,
+  HttpStatus,
+  ParseIntPipe,
+} from '@nestjs/common';
 import { ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { PaymentService } from '@src/modules/payments/services/payment.service';
 import { Payment } from '@src/modules/payments/entities/payment.entity';
@@ -19,7 +27,9 @@ export class PaymentController {
     HttpStatus.NOT_FOUND,
   ])
   @Get(':id')
-  async getPaymentById(@Param('id') id: number): Promise<Payment | null> {
+  async getPaymentById(
+    @Param('id', ParseIntPipe) id: number,
+  ): Promise<Payment> {
     return this.paymentService.findOneBy(id);
   }
 
@@ -44,7 +54,7 @@ export class PaymentController {
   ])
   @Put(':id')
   async updatePayment(
-    @Param('id') id: number,
+    @Param('id', ParseIntPipe) id: number,
     @Body() updatePaymentDto: UpdatePaymentDto,
   ): Promise<Payment | null> {
     return this.paymentService.update(id, updatePaymentDto);

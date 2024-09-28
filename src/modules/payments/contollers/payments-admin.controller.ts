@@ -1,4 +1,11 @@
-import { Get, Delete, Param, UseGuards, HttpStatus } from '@nestjs/common';
+import {
+  Get,
+  Delete,
+  Param,
+  UseGuards,
+  HttpStatus,
+  ParseIntPipe,
+} from '@nestjs/common';
 import { ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { PaymentService } from '@src/modules/payments/services/payment.service';
 import { Payment } from '@src/modules/payments/entities/payment.entity';
@@ -34,7 +41,7 @@ export class PaymentAdminController {
     HttpStatus.FORBIDDEN,
   ])
   @Delete(':id')
-  async deletePayment(@Param('id') id: number): Promise<void> {
+  async deletePayment(@Param('id', ParseIntPipe) id: number): Promise<void> {
     return this.paymentService.delete(id);
   }
 }

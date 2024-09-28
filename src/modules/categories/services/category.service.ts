@@ -1,5 +1,5 @@
-import { Injectable } from '@nestjs/common';
-import { EntityManager, Repository } from 'typeorm';
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { EntityManager, FindOptionsWhere, Repository } from 'typeorm';
 import { Category } from '@src/modules/categories/entities/category.entity';
 import { InjectEntityManager } from '@nestjs/typeorm';
 import { CreateCategoryDto } from '../dto/create-category.dto';
@@ -20,8 +20,14 @@ export class CategoryService {
     return this.repository.find();
   }
 
-  async findOne(id: number): Promise<Category | null> {
-    return this.repository.findOne({ where: { id } });
+  async findOneBy(options: FindOptionsWhere<Category>): Promise<Category> {
+    const category = await this.repository.findOneBy(options);
+
+    if (!category) {
+      throw new NotFoundException('Category not found!');
+    }
+
+    return category;
   }
 
   async create(createCategoryDto: CreateCategoryDto): Promise<Category> {
@@ -32,11 +38,9 @@ export class CategoryService {
   async update(
     id: number,
     updateCategoryDto: UpdateCategoryDto,
-  ): Promise<Category | null> {
-    const category = await this.findOne(id);
-    if (!category) {
-      return null;
-    }
+  ): Promise<Category> {
+    const category = await this.findOneBy({ id });
+
     Object.assign(category, updateCategoryDto);
     return this.repository.save(category);
   }

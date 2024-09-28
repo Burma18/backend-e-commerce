@@ -1,6 +1,6 @@
 import { ApiOperation, ApiParam, ApiBearerAuth } from '@nestjs/swagger';
 import { ProductService } from '@src/modules/products/services/product.service';
-import { Get, HttpStatus, Param } from '@nestjs/common';
+import { Get, HttpStatus, Param, ParseIntPipe } from '@nestjs/common';
 import { WebController } from '@src/common/decorators/web-controller.decorator';
 import { ApiResponseDecorator } from '@src/common/decorators/api-response.decorator';
 import { Product } from '../entities/product.entity';
@@ -28,7 +28,7 @@ export class ProductController {
     HttpStatus.NOT_FOUND,
   ])
   @ApiParam({ name: 'id', description: 'The ID of the product', example: 1 })
-  async findById(@Param('id') id: number) {
+  async findById(@Param('id', ParseIntPipe) id: number) {
     return await this.productService.findById(id);
   }
 }

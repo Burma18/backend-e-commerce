@@ -9,6 +9,7 @@ import {
   HttpCode,
   HttpStatus,
   UseGuards,
+  ParseIntPipe,
 } from '@nestjs/common';
 import { CategoryService } from '../services/category.service';
 import { CreateCategoryDto } from '../dto/create-category.dto';
@@ -53,8 +54,8 @@ export class CategoryController {
     HttpStatus.FORBIDDEN,
   ])
   @Get(':id')
-  async findOne(@Param('id') id: number): Promise<Category> {
-    const category = await this.categoryService.findOne(id);
+  async findOne(@Param('id', ParseIntPipe) id: number): Promise<Category> {
+    const category = await this.categoryService.findOneBy({ id });
     if (!category) {
       throw new NotFoundException(`Category with ID ${id} not found`);
     }
@@ -85,7 +86,7 @@ export class CategoryController {
   ])
   @Put(':id')
   async update(
-    @Param('id') id: number,
+    @Param('id', ParseIntPipe) id: number,
     @Body() updateCategoryDto: UpdateCategoryDto,
   ): Promise<Category> {
     const category = await this.categoryService.update(id, updateCategoryDto);
@@ -105,8 +106,8 @@ export class CategoryController {
   ])
   @HttpCode(HttpStatus.NO_CONTENT)
   @Delete(':id')
-  async delete(@Param('id') id: number): Promise<void> {
-    const category = await this.categoryService.findOne(id);
+  async delete(@Param('id', ParseIntPipe) id: number): Promise<void> {
+    const category = await this.categoryService.findOneBy({ id });
     if (!category) {
       throw new NotFoundException(`Category with ID ${id} not found`);
     }

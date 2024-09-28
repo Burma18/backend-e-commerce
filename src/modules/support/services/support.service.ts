@@ -1,6 +1,6 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectEntityManager } from '@nestjs/typeorm';
-import { EntityManager, Repository } from 'typeorm';
+import { EntityManager, FindOptionsWhere, Repository } from 'typeorm';
 import { Support } from '@src/modules/support/entities/support.entity';
 import { CreateSupportDto } from '@src/modules/support/dto/create-support.dto';
 import { UpdateSupportDto } from '@src/modules/support/dto/update-support.dto';
@@ -20,8 +20,14 @@ export class SupportService {
     return this.repository.find();
   }
 
-  async findOneById(id: number): Promise<Support | null> {
-    return this.repository.findOneBy({ id });
+  async findOneBy(options: FindOptionsWhere<Support>): Promise<Support> {
+    const support = await this.repository.findOneBy(options);
+
+    if (!support) {
+      throw new NotFoundException('Support request not found!');
+    }
+
+    return support;
   }
 
   async create(createSupportDto: CreateSupportDto): Promise<Support> {
@@ -32,9 +38,9 @@ export class SupportService {
   async update(
     id: number,
     updateSupportDto: UpdateSupportDto,
-  ): Promise<Support | null> {
+  ): Promise<Support> {
     await this.repository.update(id, updateSupportDto);
-    return this.findOneById(id);
+    return this.findOneBy({ id });
   }
 
   async remove(id: number): Promise<void> {
