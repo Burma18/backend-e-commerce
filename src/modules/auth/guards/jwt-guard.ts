@@ -13,10 +13,15 @@ export class JwtGuard implements CanActivate {
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest();
 
-    const excludedPaths = ['/api/v1/auth/start', '/api/v1/auth'];
+    console.log('req.url :', request.url);
+    const excludedPaths = [
+      '/api/v1/auth/start',
+      '/api/v1/auth',
+      '/api/crypto-pay/handle-payment',
+    ];
 
-    console.log('request.cookies :', request.cookies);
     if (excludedPaths.includes(request.url)) {
+      console.log('skipping guards');
       return true;
     }
 

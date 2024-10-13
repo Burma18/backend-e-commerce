@@ -22,13 +22,19 @@ import { AllowedRoles } from '@src/common/decorators/allowed-roles.decorator';
 import { Roles } from '@src/common/enums/roles.enum';
 import { AdminController } from '@src/common/decorators/admin-controller.decorator';
 import { ApiResponseDecorator } from '@src/common/decorators/api-response.decorator';
+import { HttpService } from '@nestjs/axios';
+import { map } from 'rxjs/operators';
+import { Observable } from 'rxjs';
 
 @ApiBearerAuth()
 @AllowedRoles([Roles.ADMIN])
 @UseGuards(RolesGuard)
 @AdminController({ routePrefix: 'user', tagName: 'User' })
 export class UserAdminController {
-  constructor(private readonly userService: UserService) {}
+  constructor(
+    private readonly userService: UserService,
+    private readonly httpService: HttpService,
+  ) {}
 
   @ApiOperation({ summary: 'Get all users' })
   @ApiResponse({ status: 200, description: 'List of users', type: [User] })
@@ -36,6 +42,14 @@ export class UserAdminController {
   @Get()
   findAll() {
     return this.userService.findAll();
+  }
+
+  @Get('test')
+  check(): Observable<any> {
+    // Отправляем GET-запрос на localhost:5000/api и возвращаем его результат
+    return this.httpService
+      .get('http://localhost:5000/geo')
+      .pipe(map((response) => response.data));
   }
 
   @ApiOperation({ summary: 'Get user by ID' })

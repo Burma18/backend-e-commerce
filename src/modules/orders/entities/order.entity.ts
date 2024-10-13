@@ -6,7 +6,6 @@ import {
   OneToMany,
 } from 'typeorm';
 import { User } from '@src/modules/users/entities/user.entity';
-import { OrderStatus } from '@src/modules/orders/enums/order-status.enum';
 import { Payment } from '@src/modules/payments/entities/payment.entity';
 import { OrderItem } from './order-item.entity';
 
@@ -20,9 +19,6 @@ export class Order {
 
   @Column({ type: 'decimal' })
   totalPrice: number;
-
-  @Column({ type: 'enum', enum: OrderStatus, default: OrderStatus.PENDING })
-  status: OrderStatus;
 
   @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
   createdAt: Date;

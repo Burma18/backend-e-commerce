@@ -84,10 +84,6 @@ export class OrderService {
       order.totalPrice = await this.calculateTotalPrice(order.orderItems);
     }
 
-    if (updateOrderDto.status) {
-      order.status = updateOrderDto.status;
-    }
-
     return await this.repository.save(order);
   }
 

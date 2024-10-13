@@ -34,7 +34,7 @@ export class AuthController {
 
   @ApiOperation({ summary: 'Create a new user' })
   @ApiResponseDecorator([{ code: HttpStatus.OK, options: { type: User } }])
-  @Post()
+  @Post('')
   async create(@Body() createUserDto: CreateUserDto, @Res() res: Response) {
     const newUser = await this.userService.create(createUserDto);
     const result = await this.authService.start({

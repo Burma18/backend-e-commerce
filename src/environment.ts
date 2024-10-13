@@ -20,4 +20,7 @@ export const environment = {
     telegramBotToken: env.get('TELEGRAM_BOT_TOKEN').required().asString(),
   },
   jwtSecret: env.get('JWT_SECRET').required().asString(),
+  payment: {
+    cryptoPayToken: env.get('CRYPTO_PAY_TOKEN').required().asString(),
+  },
 };

@@ -29,6 +29,7 @@
     "pretty": true,
     "useUnknownInCatchVariables": true,
     "esModuleInterop": true,
+    "typeRoots": ["./src/modules/crypto-pay/types", "./node_modules/@types"],
     "paths": {
       "@src/*": ["./src/*"]
     }
