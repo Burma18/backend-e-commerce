@@ -1,5 +1,12 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator';
+import {
+  IsArray,
+  IsNotEmpty,
+  IsNumber,
+  IsObject,
+  IsOptional,
+  IsString,
+} from 'class-validator';
 
 export class CreateProductDto {
   @ApiProperty({ description: 'The name of the product', example: 'Laptop' })
@@ -27,4 +34,31 @@ export class CreateProductDto {
   @IsNotEmpty()
   @IsNumber()
   categoryId: number;
+  @ApiProperty({
+    description: 'An array of credentials objects',
+    example: [
+      { username: 'admin', password: 'secret' },
+      { username: 'user', password: 'password123' },
+    ],
+  })
+  @IsOptional()
+  @IsArray()
+  @IsObject({ each: true })
+  credentials: Record<string, any>[];
+}
+export class ProductResponseDto {
+  @ApiProperty({ description: 'ID of the product' })
+  productId: number;
+
+  @ApiProperty({ description: 'Name of the product' })
+  name: string;
+
+  @ApiProperty({ description: 'Quantity of the product in the order' })
+  quantity: number;
+
+  @ApiProperty({ description: 'Price of the product' })
+  price: number;
+
+  @ApiProperty({ description: 'Credentials of the product' })
+  credentials: Record<string, any>[];
 }

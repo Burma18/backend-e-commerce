@@ -12,6 +12,9 @@ export class Product {
   @Column({ type: 'text', nullable: true })
   description: string;
 
+  @Column({ type: 'jsonb', nullable: true })
+  credentials: Record<string, any>[];
+
   @Column({ type: 'decimal' })
   price: number;
 

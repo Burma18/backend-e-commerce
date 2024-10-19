@@ -1,12 +1,12 @@
 import { Module } from '@nestjs/common';
-import { CryptoPayService } from './services/crypto-pay.service';
-import { CryptoPayController } from './controllers/crypto-pay.controller';
-import { BalanceModule } from '../balance/balance.module';
+import { PaymentService } from './services/crypto-pay.service';
+import { PaymentController } from './controllers/crypto-pay.controller';
+import { UsersModule } from '../users/users.module';
 
 @Module({
-  imports: [BalanceModule],
-  providers: [CryptoPayService],
-  exports: [CryptoPayService],
-  controllers: [CryptoPayController],
+  imports: [UsersModule],
+  providers: [PaymentService],
+  exports: [PaymentService],
+  controllers: [PaymentController],
 })
-export class CryptoPayModule {}
+export class PaymentModule {}

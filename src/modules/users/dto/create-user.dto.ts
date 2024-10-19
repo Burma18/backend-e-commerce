@@ -15,8 +15,8 @@ export class CreateUserDto {
 
   @ApiProperty({ description: 'Balance of the user', required: false })
   @IsOptional()
-  @IsNotEmpty()
-  balance?: number;
+  @IsString()
+  balance?: string;
 
   @ApiProperty({ description: 'Role of the user' })
   @IsNotEmpty()

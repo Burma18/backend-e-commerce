@@ -1,26 +1,22 @@
 import { Injectable } from '@nestjs/common';
-import {
-  CryptoPay,
-  PaymentUpdate,
-  Invoice,
-  AppInfo,
-} from '@foile/crypto-pay-api';
+import { CryptoPay, Invoice, AppInfo } from '@foile/crypto-pay-api';
 import { CreateInvoiceDto } from '../dto/create-invoice.dto';
 import { environment } from '@src/environment';
-import { BalanceService } from '@src/modules/balance/services/balance.services';
-import { Payment } from '@src/modules/payments/entities/payment.entity';
-import { PaymentStatus } from '@src/modules/payments/enums/payment-status.enum';
 import { InjectEntityManager } from '@nestjs/typeorm';
 import { EntityManager, Repository } from 'typeorm';
+import { UpdateInvoiceDto } from '../dto/payment-update.dto';
+import { UserService } from '@src/modules/users/services/user.service';
+import { Payment } from '../entities/payment.entity';
+import { PaymentStatus } from '../enums/payment-status.enum';
 
 @Injectable()
-export class CryptoPayService {
+export class PaymentService {
   private cryptoPay: CryptoPay;
   private paymentRepository: Repository<Payment>;
   constructor(
     @InjectEntityManager()
     private readonly entityManager: EntityManager,
-    private readonly balanceService: BalanceService,
+    private readonly userService: UserService,
   ) {
     this.paymentRepository = this.entityManager.getRepository(Payment);
     const token = environment.payment.cryptoPayToken;
@@ -70,7 +66,7 @@ export class CryptoPayService {
     }
   }
 
-  async handleInvoicePaid(webhook: PaymentUpdate): Promise<void> {
+  async handleInvoicePaid(webhook: UpdateInvoiceDto): Promise<void> {
     try {
       console.log('Webhook received', webhook);
 
@@ -114,7 +110,7 @@ export class CryptoPayService {
 
         await this.paymentRepository.save(payment);
 
-        await this.balanceService.addUserBalance(payment.user.id, amountPaid);
+        await this.userService.addUserBalance(payment.user.id, amountPaid);
       } else {
         console.error('Invalid payment currency or amount');
       }

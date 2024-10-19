@@ -17,7 +17,7 @@ export class JwtGuard implements CanActivate {
     const excludedPaths = [
       '/api/v1/auth/start',
       '/api/v1/auth',
-      '/api/crypto-pay/handle-payment',
+      '/api/v1/payment/handle-payment',
     ];
 
     if (excludedPaths.includes(request.url)) {

@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectEntityManager } from '@nestjs/typeorm';
 import { EntityManager, Repository } from 'typeorm';
 import { Order } from '@src/modules/orders/entities/order.entity';
@@ -7,6 +11,9 @@ import { UpdateOrderDto } from '../dto/update-order.dto';
 import { OrderItemDto } from '../dto/order-item.dto';
 import { OrderItem } from '../entities/order-item.entity';
 import { Product } from '@src/modules/products/entities/product.entity';
+import { OrderStatus } from '../enums/order.status.enum';
+import { UserService } from '@src/modules/users/services/user.service';
+import { MakePurchaseResponse } from '../dto/make-purchase.dto';
 @Injectable()
 export class OrderService {
   private repository: Repository<Order>;
@@ -14,31 +21,56 @@ export class OrderService {
   constructor(
     @InjectEntityManager()
     private readonly entityManager: EntityManager,
+    private readonly userService: UserService,
   ) {
     this.repository = this.entityManager.getRepository(Order);
   }
 
   async findAll(): Promise<Order[]> {
     return this.repository.find({
-      relations: ['orderItems', 'orderItems.product'],
+      relations: ['items', 'items.product'],
+      order: { createdAt: 'DESC' },
     });
   }
 
-  async findOne(id: number): Promise<Order | null> {
-    return this.repository.findOne({
-      where: { id },
-      relations: ['orderItems', 'orderItems.product'],
+  async findAllByUser(userId: number): Promise<Order[]> {
+    console.log('userId', userId);
+    console.log('typeof userId ', typeof userId);
+    return this.repository.find({
+      where: { user: { id: userId } },
+      relations: ['items', 'items.product'],
+      order: { createdAt: 'DESC' },
     });
   }
 
-  async create(createOrderDto: CreateOrderDto): Promise<Order> {
+  async findOne(id: number, userId?: number): Promise<Order> {
+    const whereCondition: any = { id };
+
+    if (userId) {
+      whereCondition.user = { id: userId };
+    }
+
+    const order = await this.repository.findOne({
+      where: whereCondition,
+      relations: ['items', 'items.product'],
+    });
+
+    if (!order) {
+      throw new NotFoundException('Order not found!');
+    }
+
+    return order;
+  }
+
+  async create(userId: number, createOrderDto: CreateOrderDto): Promise<Order> {
     const orderItems = this.mapOrderItems(createOrderDto.orderItems);
 
     const totalPrice = await this.calculateTotalPrice(orderItems);
 
     const newOrder = this.entityManager.create(Order, {
+      userId,
       totalPrice,
-      orderItems,
+      items: orderItems,
     });
 
     return this.repository.save(newOrder);
@@ -75,13 +107,13 @@ export class OrderService {
   async update(
     id: number,
     updateOrderDto: UpdateOrderDto,
-  ): Promise<Order | null> {
-    const order = await this.findOne(id);
-    if (!order) throw new NotFoundException(`Order with ID ${id} not found`);
+    userId?: number,
+  ): Promise<Order> {
+    const order = await this.findOne(id, userId);
 
     if (updateOrderDto.orderItems) {
-      order.orderItems = this.mapOrderItems(updateOrderDto.orderItems);
-      order.totalPrice = await this.calculateTotalPrice(order.orderItems);
+      order.items = this.mapOrderItems(updateOrderDto.orderItems);
+      order.totalPrice = await this.calculateTotalPrice(order.items);
     }
 
     return await this.repository.save(order);
@@ -89,5 +121,47 @@ export class OrderService {
 
   async delete(id: number): Promise<void> {
     await this.repository.delete(id);
+  }
+
+  async makePurchase(
+    userId: number,
+    orderId: number,
+  ): Promise<MakePurchaseResponse> {
+    const order = await this.repository.findOne({
+      where: { id: orderId },
+      relations: ['items', 'items.product'],
+    });
+
+    if (!order) {
+      throw new NotFoundException(`Order with ID ${orderId} not found`);
+    }
+
+    const { balance } = await this.userService.getUserBalance(userId);
+
+    if (parseFloat(balance) < order.totalPrice) {
+      throw new BadRequestException(
+        `Недостаточно средств на балансе. Пополните, пожалуйста, ваш баланс.`,
+      );
+    }
+
+    const updatedBalance = parseFloat(balance) - order.totalPrice;
+
+    await this.userService.addUserBalance(userId, -order.totalPrice);
+
+    order.status = OrderStatus.PAID;
+    await this.repository.save(order);
+
+    return {
+      orderId: order.id,
+      totalPrice: order.totalPrice,
+      products: order.items.map((item) => ({
+        productId: item.product.id,
+        name: item.product.name,
+        quantity: item.quantity,
+        price: item.product.price,
+        credentials: item.product.credentials,
+      })),
+      remainingBalance: updatedBalance.toString(),
+    };
   }
 }

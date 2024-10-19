@@ -29,4 +29,7 @@ export class UpdateProductDto {
   @IsOptional()
   @IsNumber()
   categoryId?: number;
+
+  @ApiPropertyOptional({ description: 'Credentials of the product' })
+  credentials: Record<string, any>[];
 }

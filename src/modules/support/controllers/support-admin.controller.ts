@@ -77,7 +77,7 @@ export class SupportAdminController {
   async updateSupportRequest(
     @Param('id', ParseIntPipe) id: number,
     @Body() updateSupportDto: UpdateSupportDto,
-  ): Promise<Support | null> {
+  ): Promise<Support> {
     return await this.supportService.update(id, updateSupportDto);
   }
 

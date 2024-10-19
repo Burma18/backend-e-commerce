@@ -6,6 +6,7 @@ import {
   Body,
   UseGuards,
   ParseIntPipe,
+  HttpStatus,
 } from '@nestjs/common';
 import { OrderService } from '@src/modules/orders/services/order.service';
 import { Order } from '@src/modules/orders/entities/order.entity';
@@ -22,6 +23,7 @@ import { RolesGuard } from '@src/modules/auth/guards/roles-guard';
 import { AllowedRoles } from '@src/common/decorators/allowed-roles.decorator';
 import { Roles } from '@src/common/enums/roles.enum';
 import { AdminController } from '@src/common/decorators/admin-controller.decorator';
+import { ApiResponseDecorator } from '@src/common/decorators/api-response.decorator';
 
 @ApiBearerAuth()
 @AllowedRoles([Roles.ADMIN])
@@ -44,9 +46,7 @@ export class OrderAdminController {
   @ApiResponse({ status: 404, description: 'Order not found.' })
   @ApiForbiddenResponse({ description: 'Access denied. Admins only.' })
   @Get(':id')
-  async getOrderById(
-    @Param('id', ParseIntPipe) id: number,
-  ): Promise<Order | null> {
+  async getOrderById(@Param('id', ParseIntPipe) id: number): Promise<Order> {
     return this.orderService.findOne(id);
   }
 
@@ -60,7 +60,7 @@ export class OrderAdminController {
   async updateOrder(
     @Param('id', ParseIntPipe) id: number,
     @Body() updateOrderDto: UpdateOrderDto,
-  ): Promise<Order | null> {
+  ): Promise<Order> {
     return this.orderService.update(id, updateOrderDto);
   }
 
@@ -70,7 +70,20 @@ export class OrderAdminController {
   @ApiResponse({ status: 404, description: 'Order not found.' })
   @ApiForbiddenResponse({ description: 'Access denied. Admins only.' })
   @Delete(':id')
-  async deleteOrder(@Param('id') id: number): Promise<void> {
+  async deleteOrder(@Param('id', ParseIntPipe) id: number): Promise<void> {
     return this.orderService.delete(id);
+  }
+
+  @ApiOperation({ summary: 'Get all orders for user' })
+  @ApiResponseDecorator([
+    { code: HttpStatus.OK, options: { type: Order } },
+    HttpStatus.UNAUTHORIZED,
+    HttpStatus.FORBIDDEN,
+  ])
+  @Get('userOrder/:id')
+  async getAllOrdersOfUser(
+    @Param('id', ParseIntPipe) id: number,
+  ): Promise<Order[]> {
+    return await this.orderService.findAllByUser(id);
   }
 }

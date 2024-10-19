@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsOptional, IsString, IsBoolean, IsNumber } from 'class-validator';
+import { IsOptional, IsString, IsBoolean } from 'class-validator';
 import { UserRole } from '@src/modules/users/enums/user-role.enum';
 
 export class UpdateUserDto {
@@ -10,8 +10,8 @@ export class UpdateUserDto {
 
   @ApiProperty({ description: 'Updated balance of the user', required: false })
   @IsOptional()
-  @IsNumber()
-  balance?: number;
+  @IsString()
+  balance?: string;
 
   @ApiProperty({
     description: 'Status indicating whether the user is blocked',

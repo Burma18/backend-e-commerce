@@ -1,5 +1,4 @@
 declare module '@foile/crypto-pay-api' {
-  // The structure of an invoice
   interface Invoice {
     invoice_id: number;
     currency_type: string;
@@ -11,10 +10,8 @@ declare module '@foile/crypto-pay-api' {
     mini_app_invoice_url: string;
     web_app_invoice_url: string;
     created_at: string;
-    payload?: string; // This will store additional information like userId
+    payload?: string;
   }
-
-  // The structure of a payment update that comes from the webhook
   interface PaymentUpdate {
     update_id: number;
     update_type: string;
@@ -48,28 +45,22 @@ declare module '@foile/crypto-pay-api' {
     };
   }
 
-  // Information about the CryptoPay application
   interface AppInfo {
     app_id: number;
     name: string;
     payment_processing_enabled: boolean;
   }
-
-  // Extending the CryptoPay class for interacting with the API
   class CryptoPay {
     constructor(token: string, config?: { hostname: string; protocol: string });
 
-    // Method to create an invoice with optional description and payload
     createInvoice(
       currency: string,
       amount: number,
       options?: { description?: string; payload?: string },
     ): Promise<Invoice>;
 
-    // Method to get the application information
     getMe(): Promise<AppInfo>;
   }
 
-  // Exporting types for use in your application
   export { CryptoPay, Invoice, PaymentUpdate, AppInfo };
 }

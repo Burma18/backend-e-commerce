@@ -4,8 +4,8 @@ export interface IUser {
   id: number;
   username: string;
   telegramId: string;
-  balance: number;
   role: UserRole;
+  balance: string;
   isBlocked: boolean;
   registrationDate: Date;
 }

@@ -4,8 +4,8 @@ import { Between, EntityManager, FindOptionsWhere, Repository } from 'typeorm';
 import { User } from '@src/modules/users/entities/user.entity';
 import { CreateUserDto } from '@src/modules/users/dto/create-user.dto';
 import { UpdateUserDto } from '@src/modules/users/dto/update-user.dto';
-import { Payment } from '@src/modules/payments/entities/payment.entity';
 import { plainToInstance } from 'class-transformer';
+import { Payment } from '@src/modules/crypto-pay/entities/payment.entity';
 
 @Injectable()
 export class UserService {
@@ -37,12 +37,18 @@ export class UserService {
     return user;
   }
 
-  async findByTelegramId(telegramId: string): Promise<User | null> {
-    return this.repository.findOne({ where: { telegramId } });
+  async findByTelegramId(telegramId: string): Promise<User> {
+    const user = await this.repository.findOne({ where: { telegramId } });
+    if (!user) {
+      throw new NotFoundException('User not found!');
+    }
+
+    return user;
   }
 
-  async update(id: number, updateUserDto: UpdateUserDto): Promise<User | null> {
-    await this.repository.update(id, updateUserDto);
+  async update(id: number, dto: UpdateUserDto): Promise<User> {
+    console.log('updateUserDto :', dto);
+    await this.repository.update(id, dto);
     return this.findOneBy({ id });
   }
 
@@ -75,6 +81,7 @@ export class UserService {
   async updateMe(id: number, dto: UpdateUserDto): Promise<User> {
     const existingUser = await this.findOneBy({ id });
 
+    console.log('dto :', dto);
     await this.repository.update({ id }, dto);
 
     return plainToInstance(User, {
@@ -85,5 +92,28 @@ export class UserService {
 
   async getMe(id: number): Promise<User> {
     return this.findOneBy({ id });
+  }
+
+  async getUserBalance(id: number): Promise<{ balance: string }> {
+    const user = await this.findOneBy({ id });
+
+    return { balance: user.balance };
+  }
+
+  async addUserBalance(
+    id: number,
+    amount: number,
+  ): Promise<{ balance: string }> {
+    const user = await this.findOneBy({ id });
+
+    const currentBalance = parseFloat(user.balance);
+
+    const newBalance = currentBalance + amount;
+
+    user.balance = newBalance.toFixed(2);
+
+    await this.repository.save(user);
+
+    return { balance: user.balance };
   }
 }

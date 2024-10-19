@@ -20,20 +20,26 @@ import {
 } from '@nestjs/swagger';
 import { WebController } from '@src/common/decorators/web-controller.decorator';
 import { ApiResponseDecorator } from '@src/common/decorators/api-response.decorator';
+import { GetJwtPayload } from '@src/common/decorators/get-jwt-payload.decorator';
+import { IJwtPayload } from '@src/common/interaces/jwt-payload.interface';
+import {
+  MakePurchaseDto,
+  MakePurchaseResponse,
+} from '../dto/make-purchase.dto';
 
 @ApiBearerAuth()
 @WebController({ routePrefix: 'order', tagName: 'Order' })
 export class OrderController {
   constructor(private readonly orderService: OrderService) {}
 
-  @ApiOperation({ summary: 'Get all orders' })
+  @ApiOperation({ summary: 'Get all orders for user' })
   @ApiResponseDecorator([
     { code: HttpStatus.OK, options: { type: Order } },
     HttpStatus.UNAUTHORIZED,
   ])
   @Get()
-  async getAllOrders(): Promise<Order[]> {
-    return this.orderService.findAll();
+  async getAllOrders(@GetJwtPayload() user: IJwtPayload): Promise<Order[]> {
+    return await this.orderService.findAllByUser(user.id);
   }
 
   @ApiOperation({ summary: 'Get an order by ID' })
@@ -45,9 +51,9 @@ export class OrderController {
   ])
   @Get(':id')
   async getOrderById(
-    @Param('id', ParseIntPipe) id: number,
-  ): Promise<Order | null> {
-    return this.orderService.findOne(id);
+    @Param('id', ParseIntPipe) orderId: number,
+  ): Promise<Order> {
+    return await this.orderService.findOne(orderId);
   }
 
   @ApiOperation({ summary: 'Create a new order' })
@@ -58,8 +64,11 @@ export class OrderController {
     HttpStatus.BAD_REQUEST,
   ])
   @Post()
-  async createOrder(@Body() createOrderDto: CreateOrderDto): Promise<Order> {
-    return this.orderService.create(createOrderDto);
+  async createOrder(
+    @GetJwtPayload() user: IJwtPayload,
+    @Body() createOrderDto: CreateOrderDto,
+  ): Promise<Order> {
+    return await this.orderService.create(user.id, createOrderDto);
   }
 
   @ApiOperation({ summary: 'Update an order by ID' })
@@ -72,10 +81,11 @@ export class OrderController {
   ])
   @Put(':id')
   async updateOrder(
-    @Param('id', ParseIntPipe) id: number,
+    @GetJwtPayload() user: IJwtPayload,
+    @Param('id', ParseIntPipe) orderId: number,
     @Body() updateOrderDto: UpdateOrderDto,
-  ): Promise<Order | null> {
-    return this.orderService.update(id, updateOrderDto);
+  ): Promise<Order> {
+    return await this.orderService.update(orderId, updateOrderDto, user.id);
   }
 
   @ApiOperation({ summary: 'Delete an order by ID' })
@@ -86,7 +96,28 @@ export class OrderController {
     HttpStatus.NOT_FOUND,
   ])
   @Delete(':id')
-  async deleteOrder(@Param('id') id: number): Promise<void> {
-    return this.orderService.delete(id);
+  async deleteOrder(
+    @Param('orderId', ParseIntPipe) orderId: number,
+  ): Promise<void> {
+    return await this.orderService.delete(orderId);
+  }
+
+  @ApiOperation({ summary: 'Make a purchase' })
+  @ApiBody({ type: MakePurchaseDto })
+  @ApiResponseDecorator([
+    { code: HttpStatus.OK, options: { type: Order } },
+    HttpStatus.UNAUTHORIZED,
+    HttpStatus.NOT_FOUND,
+    HttpStatus.BAD_REQUEST,
+  ])
+  @Post('purchase')
+  async makePurchase(
+    @GetJwtPayload() user: IJwtPayload,
+    @Body() makePurchaseDto: MakePurchaseDto,
+  ): Promise<MakePurchaseResponse> {
+    return await this.orderService.makePurchase(
+      user.id,
+      makePurchaseDto.orderId,
+    );
   }
 }
