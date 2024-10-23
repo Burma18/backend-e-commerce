@@ -4,16 +4,16 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectEntityManager } from '@nestjs/typeorm';
-import { EntityManager, Repository } from 'typeorm';
+import { EntityManager, In, Repository } from 'typeorm';
 import { Order } from '@src/modules/orders/entities/order.entity';
-import { CreateOrderDto } from '../dto/create-order.dto';
 import { UpdateOrderDto } from '../dto/update-order.dto';
 import { OrderItemDto } from '../dto/order-item.dto';
 import { OrderItem } from '../entities/order-item.entity';
 import { Product } from '@src/modules/products/entities/product.entity';
 import { OrderStatus } from '../enums/order.status.enum';
 import { UserService } from '@src/modules/users/services/user.service';
-import { MakePurchaseResponse } from '../dto/make-purchase.dto';
+import { MakePurchaseOverallResponse } from '../dto/make-purchase.dto';
+import { GetAllOrdersPriceResponseDto } from '../dto/get-total-price-all-orders.dto';
 @Injectable()
 export class OrderService {
   private repository: Repository<Order>;
@@ -33,14 +33,19 @@ export class OrderService {
     });
   }
 
-  async findAllByUser(userId: number): Promise<Order[]> {
-    console.log('userId', userId);
-    console.log('typeof userId ', typeof userId);
-    return this.repository.find({
-      where: { user: { id: userId } },
-      relations: ['items', 'items.product'],
-      order: { createdAt: 'DESC' },
-    });
+  async findAllByUser(userId: number, status?: OrderStatus): Promise<Order[]> {
+    const query = this.repository
+      .createQueryBuilder('order')
+      .where('order.userId = :userId', { userId })
+      .leftJoinAndSelect('order.items', 'items')
+      .leftJoinAndSelect('items.product', 'product')
+      .orderBy('order.createdAt', 'DESC');
+
+    if (status) {
+      query.andWhere('order.status = :status', { status });
+    }
+
+    return await query.getMany();
   }
 
   async findOne(id: number, userId?: number): Promise<Order> {
@@ -62,27 +67,46 @@ export class OrderService {
     return order;
   }
 
-  async create(userId: number, createOrderDto: CreateOrderDto): Promise<Order> {
-    const orderItems = this.mapOrderItems(createOrderDto.orderItems);
+  async create(userId: number, createOrderDto: OrderItemDto): Promise<Order> {
+    const orderItem = this.mapOrderItems(createOrderDto);
 
-    const totalPrice = await this.calculateTotalPrice(orderItems);
+    const totalPrice = await this.calculateTotalPrice(orderItem);
 
     const newOrder = this.entityManager.create(Order, {
       userId,
       totalPrice,
-      items: orderItems,
+      items: orderItem,
     });
 
     return this.repository.save(newOrder);
   }
 
-  private mapOrderItems(orderItemsDto: OrderItemDto[]): OrderItem[] {
-    return orderItemsDto.map((itemDto) => {
-      const orderItem = new OrderItem();
-      orderItem.product = { id: itemDto.productId } as Product;
-      orderItem.quantity = itemDto.quantity;
-      return orderItem;
+  async calculateTotalPriceOfOrders(
+    userId: number,
+  ): Promise<GetAllOrdersPriceResponseDto> {
+    const orders = await this.findAllByUser(userId, OrderStatus.PENDING);
+    const orderItems = this.mapOrders(orders);
+
+    const totalPrice = await this.calculateTotalPrice(orderItems);
+
+    return { totalPrice, orders };
+  }
+
+  private mapOrders(orders: Order[]): OrderItem[] {
+    const orderItems: OrderItem[] = [];
+
+    orders.forEach((order) => {
+      order.items.forEach((item) => {
+        const orderItem = new OrderItem();
+        orderItem.orderId = order.id;
+        orderItem.product = item.product;
+        orderItem.quantity = item.quantity;
+
+        orderItems.push(orderItem);
+      });
     });
+
+    return orderItems;
   }
 
   private async calculateTotalPrice(orderItems: OrderItem[]): Promise<number> {
@@ -102,6 +126,21 @@ export class OrderService {
     }
 
     return total;
+  }
+
+  private mapOrderItems(
+    orderItemsDto: OrderItemDto | OrderItemDto[],
+  ): OrderItem[] {
+    const items = Array.isArray(orderItemsDto)
+      ? orderItemsDto
+      : [orderItemsDto];
+
+    return items.map((itemDto) => {
+      const orderItem = new OrderItem();
+      orderItem.product = { id: itemDto.productId } as Product;
+      orderItem.quantity = itemDto.quantity;
+      return orderItem;
+    });
   }
 
   async update(
@@ -125,42 +164,56 @@ export class OrderService {
 
   async makePurchase(
     userId: number,
-    orderId: number,
-  ): Promise<MakePurchaseResponse> {
-    const order = await this.repository.findOne({
-      where: { id: orderId },
+    orderIds: number[],
+  ): Promise<MakePurchaseOverallResponse> {
+    const orders = await this.repository.find({
+      where: {
+        id: In(orderIds),
+      },
       relations: ['items', 'items.product'],
     });
 
-    if (!order) {
-      throw new NotFoundException(`Order with ID ${orderId} not found`);
+    if (orders.length !== orderIds.length) {
+      throw new NotFoundException(`One or more orders not found`);
     }
 
     const { balance } = await this.userService.getUserBalance(userId);
+    const totalAmount = orders.reduce(
+      (sum, order) => sum + Number(order.totalPrice),
+      0,
+    );
 
-    if (parseFloat(balance) < order.totalPrice) {
+    if (parseFloat(balance) < totalAmount) {
       throw new BadRequestException(
         `Недостаточно средств на балансе. Пополните, пожалуйста, ваш баланс.`,
       );
     }
 
-    const updatedBalance = parseFloat(balance) - order.totalPrice;
+    const updatedBalance = parseFloat(balance) - totalAmount;
 
-    await this.userService.addUserBalance(userId, -order.totalPrice);
+    await this.userService.addUserBalance(userId, -totalAmount);
 
-    order.status = OrderStatus.PAID;
-    await this.repository.save(order);
+    const purchaseResponses = await Promise.all(
+      orders.map(async (order) => {
+        order.status = OrderStatus.PAID;
+        await this.repository.save(order);
+
+        return {
+          orderId: order.id,
+          totalPrice: order.totalPrice,
+          products: order.items.map((item) => ({
+            productId: item.product.id,
+            name: item.product.name,
+            quantity: item.quantity,
+            price: item.product.price,
+            credentials: item.product.credentials,
+          })),
+        };
+      }),
+    );
 
     return {
-      orderId: order.id,
-      totalPrice: order.totalPrice,
-      products: order.items.map((item) => ({
-        productId: item.product.id,
-        name: item.product.name,
-        quantity: item.quantity,
-        price: item.product.price,
-        credentials: item.product.credentials,
-      })),
+      purchases: purchaseResponses,
       remainingBalance: updatedBalance.toString(),
     };
   }

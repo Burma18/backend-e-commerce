@@ -6,7 +6,6 @@ import {
   JoinColumn,
 } from 'typeorm';
 import { User } from '@src/modules/users/entities/user.entity';
-import { Order } from '@src/modules/orders/entities/order.entity';
 import { PaymentStatus } from '../enums/payment-status.enum';
 
 @Entity()
@@ -17,10 +16,6 @@ export class Payment {
   @ManyToOne(() => User, (user) => user.payments)
   @JoinColumn({ name: 'userId' })
   user: User;
-
-  @ManyToOne(() => Order, (order) => order.payments)
-  @JoinColumn({ name: 'orderId' })
-  order: Order;
 
   @Column('decimal', { precision: 10, scale: 2 })
   amount: number;

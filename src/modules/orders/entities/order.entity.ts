@@ -9,7 +9,6 @@ import {
 import { User } from '@src/modules/users/entities/user.entity';
 import { OrderItem } from './order-item.entity';
 import { OrderStatus } from '../enums/order.status.enum';
-import { Payment } from '@src/modules/crypto-pay/entities/payment.entity';
 
 @Entity('orders')
 export class Order {
@@ -43,7 +42,4 @@ export class Order {
     cascade: true,
   })
   items: OrderItem[];
-
-  @OneToMany(() => Payment, (payment) => payment.order)
-  payments: Payment[];
 }

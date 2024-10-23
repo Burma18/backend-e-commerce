@@ -13,7 +13,6 @@ export class JwtGuard implements CanActivate {
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest();
 
-    console.log('req.url :', request.url);
     const excludedPaths = [
       '/api/v1/auth/start',
       '/api/v1/auth',

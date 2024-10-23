@@ -7,16 +7,17 @@ import {
   Body,
   HttpStatus,
   ParseIntPipe,
+  Query,
 } from '@nestjs/common';
 import { OrderService } from '@src/modules/orders/services/order.service';
 import { Order } from '@src/modules/orders/entities/order.entity';
-import { CreateOrderDto } from '../dto/create-order.dto';
 import { UpdateOrderDto } from '../dto/update-order.dto';
 import {
   ApiOperation,
   ApiBody,
   ApiParam,
   ApiBearerAuth,
+  ApiQuery,
 } from '@nestjs/swagger';
 import { WebController } from '@src/common/decorators/web-controller.decorator';
 import { ApiResponseDecorator } from '@src/common/decorators/api-response.decorator';
@@ -24,8 +25,11 @@ import { GetJwtPayload } from '@src/common/decorators/get-jwt-payload.decorator'
 import { IJwtPayload } from '@src/common/interaces/jwt-payload.interface';
 import {
   MakePurchaseDto,
-  MakePurchaseResponse,
+  MakePurchaseOverallResponse,
 } from '../dto/make-purchase.dto';
+import { OrderStatus } from '../enums/order.status.enum';
+import { GetAllOrdersPriceResponseDto } from '../dto/get-total-price-all-orders.dto';
+import { OrderItemDto } from '../dto/order-item.dto';
 
 @ApiBearerAuth()
 @WebController({ routePrefix: 'order', tagName: 'Order' })
@@ -37,9 +41,30 @@ export class OrderController {
     { code: HttpStatus.OK, options: { type: Order } },
     HttpStatus.UNAUTHORIZED,
   ])
+  @ApiQuery({
+    name: 'status',
+    required: false,
+    enum: OrderStatus,
+    description: 'Filter orders by status',
+  })
   @Get()
-  async getAllOrders(@GetJwtPayload() user: IJwtPayload): Promise<Order[]> {
-    return await this.orderService.findAllByUser(user.id);
+  async getAllOrders(
+    @GetJwtPayload() user: IJwtPayload,
+    @Query('status') status?: OrderStatus,
+  ): Promise<Order[]> {
+    return await this.orderService.findAllByUser(user.id, status);
+  }
+
+  @ApiOperation({ summary: 'Get all orders price for user' })
+  @ApiResponseDecorator([
+    { code: HttpStatus.OK, options: { type: GetAllOrdersPriceResponseDto } },
+    HttpStatus.UNAUTHORIZED,
+  ])
+  @Get('price')
+  async getPriceOfAllOrders(
+    @GetJwtPayload() user: IJwtPayload,
+  ): Promise<GetAllOrdersPriceResponseDto> {
+    return await this.orderService.calculateTotalPriceOfOrders(user.id);
   }
 
   @ApiOperation({ summary: 'Get an order by ID' })
@@ -57,7 +82,7 @@ export class OrderController {
   }
 
   @ApiOperation({ summary: 'Create a new order' })
-  @ApiBody({ type: CreateOrderDto })
+  @ApiBody({ type: OrderItemDto })
   @ApiResponseDecorator([
     { code: HttpStatus.OK, options: { type: Order } },
     HttpStatus.UNAUTHORIZED,
@@ -66,7 +91,7 @@ export class OrderController {
   @Post()
   async createOrder(
     @GetJwtPayload() user: IJwtPayload,
-    @Body() createOrderDto: CreateOrderDto,
+    @Body() createOrderDto: OrderItemDto,
   ): Promise<Order> {
     return await this.orderService.create(user.id, createOrderDto);
   }
@@ -105,7 +130,7 @@ export class OrderController {
   @ApiOperation({ summary: 'Make a purchase' })
   @ApiBody({ type: MakePurchaseDto })
   @ApiResponseDecorator([
-    { code: HttpStatus.OK, options: { type: Order } },
+    { code: HttpStatus.OK, options: { type: MakePurchaseOverallResponse } },
     HttpStatus.UNAUTHORIZED,
     HttpStatus.NOT_FOUND,
     HttpStatus.BAD_REQUEST,
@@ -114,10 +139,10 @@ export class OrderController {
   async makePurchase(
     @GetJwtPayload() user: IJwtPayload,
     @Body() makePurchaseDto: MakePurchaseDto,
-  ): Promise<MakePurchaseResponse> {
+  ): Promise<MakePurchaseOverallResponse> {
     return await this.orderService.makePurchase(
       user.id,
-      makePurchaseDto.orderId,
+      makePurchaseDto.orderIds,
     );
   }
 }

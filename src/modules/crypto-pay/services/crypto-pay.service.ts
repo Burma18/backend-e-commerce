@@ -1,6 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { CryptoPay, Invoice, AppInfo } from '@foile/crypto-pay-api';
-import { CreateInvoiceDto } from '../dto/create-invoice.dto';
+import {
+  CreateInvoiceDto,
+  InvoiceResponseDto,
+} from '../dto/create-invoice.dto';
 import { environment } from '@src/environment';
 import { InjectEntityManager } from '@nestjs/typeorm';
 import { EntityManager, Repository } from 'typeorm';
@@ -35,12 +38,14 @@ export class PaymentService {
     }
   }
 
-  async createInvoice(createInvoiceDto: CreateInvoiceDto): Promise<string> {
-    const { amount, userId, orderId } = createInvoiceDto;
+  async createInvoice(
+    createInvoiceDto: CreateInvoiceDto,
+    userId: number,
+  ): Promise<{ paymentUrl: string }> {
+    const { amount } = createInvoiceDto;
 
     const payment = this.paymentRepository.create({
       user: { id: userId },
-      order: { id: orderId },
       status: PaymentStatus.INIT,
       amount,
     });
@@ -57,19 +62,16 @@ export class PaymentService {
         },
       );
 
-      console.log('invoice :', invoice);
-      console.log('payment :', payment);
-
-      return invoice.pay_url;
+      return { paymentUrl: invoice.pay_url };
     } catch (error) {
       throw new Error(`Error creating invoice: ${error}`);
     }
   }
 
-  async handleInvoicePaid(webhook: UpdateInvoiceDto): Promise<void> {
+  async handleInvoicePaid(
+    webhook: UpdateInvoiceDto,
+  ): Promise<InvoiceResponseDto | void> {
     try {
-      console.log('Webhook received', webhook);
-
       if (webhook.update_type !== 'invoice_paid') {
         console.log('Ignored webhook: not an invoice_paid event');
         return;
@@ -110,7 +112,10 @@ export class PaymentService {
 
         await this.paymentRepository.save(payment);
 
-        await this.userService.addUserBalance(payment.user.id, amountPaid);
+        return await this.userService.addUserBalance(
+          payment.user.id,
+          amountPaid,
+        );
       } else {
         console.error('Invalid payment currency or amount');
       }

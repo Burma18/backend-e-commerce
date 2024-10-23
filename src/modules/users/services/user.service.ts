@@ -47,7 +47,6 @@ export class UserService {
   }
 
   async update(id: number, dto: UpdateUserDto): Promise<User> {
-    console.log('updateUserDto :', dto);
     await this.repository.update(id, dto);
     return this.findOneBy({ id });
   }
@@ -81,7 +80,6 @@ export class UserService {
   async updateMe(id: number, dto: UpdateUserDto): Promise<User> {
     const existingUser = await this.findOneBy({ id });
 
-    console.log('dto :', dto);
     await this.repository.update({ id }, dto);
 
     return plainToInstance(User, {
