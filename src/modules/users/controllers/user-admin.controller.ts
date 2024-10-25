@@ -57,7 +57,7 @@ export class UserAdminController {
     HttpStatus.NOT_FOUND,
     HttpStatus.FORBIDDEN,
   ])
-  @Put(':id/:telegramId')
+  @Put(':id')
   update(
     @Param('id', ParseIntPipe) id: number,
     @Body() updateUserDto: UpdateUserDto,

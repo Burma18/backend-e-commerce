@@ -45,6 +45,11 @@ export class CreateProductDto {
   @IsArray()
   @IsObject({ each: true })
   credentials: Record<string, any>[];
+
+  @ApiProperty({ description: 'Telegram Id of the user' })
+  @IsNotEmpty()
+  @IsNumber()
+  telegramId: number;
 }
 export class ProductResponseDto {
   @ApiProperty({ description: 'ID of the product' })

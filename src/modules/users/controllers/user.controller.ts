@@ -30,7 +30,7 @@ export class UserController {
     HttpStatus.NOT_FOUND,
     HttpStatus.UNAUTHORIZED,
   ])
-  @Put('me/:telegramId')
+  @Put('me')
   update(
     @GetJwtPayload() user: IJwtPayload,
     @Body() updateUserDto: UpdateUserDto,

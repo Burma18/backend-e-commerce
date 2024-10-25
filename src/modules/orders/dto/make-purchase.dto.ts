@@ -8,6 +8,11 @@ export class MakePurchaseDto {
   @IsArray()
   @IsNumber({}, { each: true })
   orderIds: number[];
+
+  @ApiProperty({ description: 'Telegram Id of the user' })
+  @IsNotEmpty()
+  @IsNumber()
+  telegramId: number;
 }
 
 export class MakePurchaseResponse {

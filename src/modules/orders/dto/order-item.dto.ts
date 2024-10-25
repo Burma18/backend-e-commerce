@@ -11,4 +11,9 @@ export class OrderItemDto {
   @IsNotEmpty()
   @IsNumber()
   quantity: number;
+
+  @ApiProperty({ description: 'Telegram Id of the user' })
+  @IsNotEmpty()
+  @IsNumber()
+  telegramId: number;
 }

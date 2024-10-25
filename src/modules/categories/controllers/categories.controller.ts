@@ -69,7 +69,7 @@ export class CategoryController {
     HttpStatus.UNAUTHORIZED,
     HttpStatus.FORBIDDEN,
   ])
-  @Post(':telegramId')
+  @Post()
   async create(
     @Body() createCategoryDto: CreateCategoryDto,
   ): Promise<Category> {
@@ -84,7 +84,7 @@ export class CategoryController {
     HttpStatus.NOT_FOUND,
     HttpStatus.FORBIDDEN,
   ])
-  @Put(':id/:telegramId')
+  @Put(':id')
   async update(
     @Param('id', ParseIntPipe) id: number,
     @Body() updateCategoryDto: UpdateCategoryDto,

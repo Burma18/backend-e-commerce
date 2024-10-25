@@ -1,5 +1,11 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsOptional, IsString, IsBoolean } from 'class-validator';
+import {
+  IsOptional,
+  IsString,
+  IsBoolean,
+  IsNotEmpty,
+  IsNumber,
+} from 'class-validator';
 import { UserRole } from '@src/modules/users/enums/user-role.enum';
 
 export class UpdateUserDto {
@@ -24,4 +30,9 @@ export class UpdateUserDto {
   @ApiProperty({ description: 'Updated role of the user', required: false })
   @IsOptional()
   role?: UserRole;
+
+  @ApiProperty({ description: 'Telegram Id of the user' })
+  @IsNotEmpty()
+  @IsNumber()
+  telegramId: number;
 }

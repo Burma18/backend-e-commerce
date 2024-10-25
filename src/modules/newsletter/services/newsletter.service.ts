@@ -4,6 +4,7 @@ import { EntityManager, Repository } from 'typeorm';
 import { Newsletter } from '@src/modules/newsletter/entities/newsletter.entity';
 import { CreateNewsletterDto } from '@src/modules/newsletter/dto/create-newsletter.dto';
 import { NewsletterStatus } from '../enum/newsletter-status.enum';
+import { UpdateNewsletterDto } from '../dto/update-newsletter.dto';
 
 @Injectable()
 export class NewsletterService {
@@ -35,7 +36,7 @@ export class NewsletterService {
     return newsletter;
   }
 
-  async update(id: number, dto: CreateNewsletterDto): Promise<Newsletter> {
+  async update(id: number, dto: UpdateNewsletterDto): Promise<Newsletter> {
     const updatedNewsletterData = {
       ...dto,
       status: NewsletterStatus.EDITED,

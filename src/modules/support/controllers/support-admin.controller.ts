@@ -59,7 +59,7 @@ export class SupportAdminController {
     HttpStatus.BAD_REQUEST,
     HttpStatus.FORBIDDEN,
   ])
-  @Post(':telegramId')
+  @Post()
   async createSupportRequest(
     @Body() createSupportDto: CreateSupportDto,
   ): Promise<Support> {
@@ -73,7 +73,7 @@ export class SupportAdminController {
     HttpStatus.NOT_FOUND,
     HttpStatus.FORBIDDEN,
   ])
-  @Put(':id/:telegramId')
+  @Put(':id')
   async updateSupportRequest(
     @Param('id', ParseIntPipe) id: number,
     @Body() updateSupportDto: UpdateSupportDto,

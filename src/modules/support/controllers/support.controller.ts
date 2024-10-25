@@ -50,7 +50,7 @@ export class SupportController {
     HttpStatus.UNAUTHORIZED,
     HttpStatus.BAD_REQUEST,
   ])
-  @Post(':telegramId')
+  @Post()
   async createSupportRequest(
     @Body() createSupportDto: CreateSupportDto,
   ): Promise<Support> {
@@ -63,7 +63,7 @@ export class SupportController {
     HttpStatus.UNAUTHORIZED,
     HttpStatus.NOT_FOUND,
   ])
-  @Put(':id/:telegramId')
+  @Put(':id')
   async updateSupportRequest(
     @Param('id', ParseIntPipe) id: number,
     @Body() updateSupportDto: UpdateSupportDto,

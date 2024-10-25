@@ -1,6 +1,6 @@
 import { ApiProperty, PartialType } from '@nestjs/swagger';
 import { CreateSupportDto } from './create-support.dto';
-import { IsString, IsOptional } from 'class-validator';
+import { IsString, IsOptional, IsNumber, IsNotEmpty } from 'class-validator';
 
 export class UpdateSupportDto extends PartialType(CreateSupportDto) {
   @ApiProperty({
@@ -10,4 +10,9 @@ export class UpdateSupportDto extends PartialType(CreateSupportDto) {
   @IsOptional()
   @IsString()
   response?: string;
+
+  @ApiProperty({ description: 'Telegram Id of the user' })
+  @IsNotEmpty()
+  @IsNumber()
+  override telegramId: number;
 }

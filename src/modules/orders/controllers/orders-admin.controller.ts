@@ -56,7 +56,7 @@ export class OrderAdminController {
   @ApiResponse({ status: 200, description: 'Order updated successfully.' })
   @ApiResponse({ status: 404, description: 'Order not found.' })
   @ApiForbiddenResponse({ description: 'Access denied. Admins only.' })
-  @Put(':id/:telegramId')
+  @Put(':id')
   async updateOrder(
     @Param('id', ParseIntPipe) id: number,
     @Body() updateOrderDto: UpdateOrderDto,

@@ -1,5 +1,5 @@
-import { ApiPropertyOptional } from '@nestjs/swagger';
-import { IsNumber, IsOptional, IsString } from 'class-validator';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator';
 
 export class UpdateProductDto {
   @ApiPropertyOptional({
@@ -31,5 +31,10 @@ export class UpdateProductDto {
   categoryId?: number;
 
   @ApiPropertyOptional({ description: 'Credentials of the product' })
-  credentials: Record<string, any>[];
+  credentials?: Record<string, any>[];
+
+  @ApiProperty({ description: 'Telegram Id of the user' })
+  @IsNotEmpty()
+  @IsNumber()
+  telegramId: number;
 }

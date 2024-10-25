@@ -88,7 +88,7 @@ export class OrderController {
     HttpStatus.UNAUTHORIZED,
     HttpStatus.BAD_REQUEST,
   ])
-  @Post(':telegramId')
+  @Post()
   async createOrder(
     @GetJwtPayload() user: IJwtPayload,
     @Body() createOrderDto: OrderItemDto,
@@ -104,7 +104,7 @@ export class OrderController {
     HttpStatus.UNAUTHORIZED,
     HttpStatus.NOT_FOUND,
   ])
-  @Put(':id/:telegramId')
+  @Put(':id')
   async updateOrder(
     @GetJwtPayload() user: IJwtPayload,
     @Param('id', ParseIntPipe) orderId: number,
@@ -135,7 +135,7 @@ export class OrderController {
     HttpStatus.NOT_FOUND,
     HttpStatus.BAD_REQUEST,
   ])
-  @Post('purchase/:telegramId')
+  @Post('purchase')
   async makePurchase(
     @GetJwtPayload() user: IJwtPayload,
     @Body() makePurchaseDto: MakePurchaseDto,

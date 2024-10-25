@@ -47,7 +47,9 @@ export class UserService {
   }
 
   async update(id: number, dto: UpdateUserDto): Promise<User> {
-    await this.repository.update(id, dto);
+    const updatedDto = { ...dto } as Omit<UpdateUserDto, 'telegramId'>;
+
+    await this.repository.update(id, updatedDto);
     return this.findOneBy({ id });
   }
 
@@ -80,11 +82,13 @@ export class UserService {
   async updateMe(id: number, dto: UpdateUserDto): Promise<User> {
     const existingUser = await this.findOneBy({ id });
 
-    await this.repository.update({ id }, dto);
+    const updatedDto = { ...dto } as Omit<UpdateUserDto, 'telegramId'>;
+
+    await this.repository.update({ id }, updatedDto);
 
     return plainToInstance(User, {
       ...existingUser,
-      ...dto,
+      ...updatedDto,
     });
   }
 

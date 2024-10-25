@@ -14,7 +14,7 @@ export class TelegramGuard implements CanActivate {
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest<IRequestWithUser>();
-    const { telegramId } = request.params;
+    const telegramId = request.params.telegramId || request.body.telegramId;
 
     if (!telegramId) {
       throw new ForbiddenException('Telegram ID not provided');

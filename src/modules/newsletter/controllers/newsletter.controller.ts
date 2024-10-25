@@ -18,6 +18,7 @@ import { AllowedRoles } from '@src/common/decorators/allowed-roles.decorator';
 import { AdminController } from '@src/common/decorators/admin-controller.decorator';
 import { ApiResponseDecorator } from '@src/common/decorators/api-response.decorator';
 import { UserRole } from '@src/modules/users/enums/user-role.enum';
+import { UpdateNewsletterDto } from '../dto/update-newsletter.dto';
 
 @ApiBearerAuth()
 @AllowedRoles([UserRole.ADMIN])
@@ -34,7 +35,7 @@ export class NewsletterController {
     HttpStatus.BAD_REQUEST,
     HttpStatus.FORBIDDEN,
   ])
-  @Post(':telegramId')
+  @Post()
   async create(
     @Body() createNewsletterDto: CreateNewsletterDto,
   ): Promise<Newsletter> {
@@ -73,12 +74,12 @@ export class NewsletterController {
     HttpStatus.NOT_FOUND,
     HttpStatus.FORBIDDEN,
   ])
-  @Put(':id/:telegramId')
+  @Put(':id')
   async update(
     @Param('id', ParseIntPipe) id: number,
-    @Body() createNewsletterDto: CreateNewsletterDto,
+    @Body() updateNewsletterDto: UpdateNewsletterDto,
   ): Promise<Newsletter | null> {
-    return await this.newsletterService.update(id, createNewsletterDto);
+    return await this.newsletterService.update(id, updateNewsletterDto);
   }
 
   @ApiOperation({ summary: 'Delete a newsletter by ID' })

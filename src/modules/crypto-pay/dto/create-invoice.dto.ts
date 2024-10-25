@@ -6,6 +6,11 @@ export class CreateInvoiceDto {
   @IsNotEmpty()
   @IsNumber()
   amount: number;
+
+  @ApiProperty({ description: 'Telegram Id of the user' })
+  @IsNotEmpty()
+  @IsNumber()
+  telegramId: number;
 }
 
 export class InvoiceResponseDto {

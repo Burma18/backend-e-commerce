@@ -43,7 +43,7 @@ export class ProductAdminController {
     return await this.productService.findAll();
   }
 
-  @Post(':telegramId')
+  @Post()
   @ApiOperation({ summary: 'Create a new product' })
   @ApiResponseDecorator([
     { code: HttpStatus.OK, options: { type: Product } },
@@ -68,7 +68,7 @@ export class ProductAdminController {
     return await this.productService.findById(id);
   }
 
-  @Put(':id/:telegramId')
+  @Put(':id')
   @ApiOperation({ summary: 'Update an existing product' })
   @ApiResponseDecorator([
     { code: HttpStatus.OK, options: { type: Product } },
