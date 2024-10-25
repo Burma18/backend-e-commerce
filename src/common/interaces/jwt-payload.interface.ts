@@ -1,6 +1,6 @@
-import { Roles } from '../enums/roles.enum';
+import { UserRole } from '@src/modules/users/enums/user-role.enum';
 
 export interface IJwtPayload {
   id: number;
-  role: Roles;
+  role: UserRole;
 }

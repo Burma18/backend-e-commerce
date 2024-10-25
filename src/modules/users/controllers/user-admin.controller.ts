@@ -19,12 +19,12 @@ import { UpdateUserDto } from '@src/modules/users/dto/update-user.dto';
 import { User } from '@src/modules/users/entities/user.entity';
 import { RolesGuard } from '@src/modules/auth/guards/roles-guard';
 import { AllowedRoles } from '@src/common/decorators/allowed-roles.decorator';
-import { Roles } from '@src/common/enums/roles.enum';
 import { AdminController } from '@src/common/decorators/admin-controller.decorator';
 import { ApiResponseDecorator } from '@src/common/decorators/api-response.decorator';
+import { UserRole } from '../enums/user-role.enum';
 
 @ApiBearerAuth()
-@AllowedRoles([Roles.ADMIN])
+@AllowedRoles([UserRole.ADMIN])
 @UseGuards(RolesGuard)
 @AdminController({ routePrefix: 'user', tagName: 'User' })
 export class UserAdminController {
@@ -33,7 +33,7 @@ export class UserAdminController {
   @ApiOperation({ summary: 'Get all users' })
   @ApiResponse({ status: 200, description: 'List of users', type: [User] })
   @ApiForbiddenResponse({ description: 'Access denied. Admins only.' })
-  @Get()
+  @Get(':telegramId')
   findAll() {
     return this.userService.findAll();
   }
@@ -45,7 +45,7 @@ export class UserAdminController {
     HttpStatus.NOT_FOUND,
     HttpStatus.FORBIDDEN,
   ])
-  @Get(':id')
+  @Get(':id/:telegramId')
   findOne(@Param('id', ParseIntPipe) id: number) {
     return this.userService.findOneBy({ id });
   }
@@ -57,7 +57,7 @@ export class UserAdminController {
     HttpStatus.NOT_FOUND,
     HttpStatus.FORBIDDEN,
   ])
-  @Put(':id')
+  @Put(':id/:telegramId')
   update(
     @Param('id', ParseIntPipe) id: number,
     @Body() updateUserDto: UpdateUserDto,
@@ -71,7 +71,7 @@ export class UserAdminController {
     HttpStatus.NOT_FOUND,
     HttpStatus.FORBIDDEN,
   ])
-  @Delete(':id')
+  @Delete(':id/:telegramId')
   remove(@Param('id', ParseIntPipe) id: number) {
     return this.userService.remove(id);
   }
@@ -82,7 +82,7 @@ export class UserAdminController {
     HttpStatus.UNAUTHORIZED,
     HttpStatus.FORBIDDEN,
   ])
-  @Get('statistics')
+  @Get('statistics/:telegramId')
   async getStatistics() {
     return this.userService.getStatistics();
   }

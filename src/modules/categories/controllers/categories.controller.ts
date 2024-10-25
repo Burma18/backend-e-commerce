@@ -23,12 +23,12 @@ import {
 } from '@nestjs/swagger';
 import { RolesGuard } from '@src/modules/auth/guards/roles-guard';
 import { AllowedRoles } from '@src/common/decorators/allowed-roles.decorator';
-import { Roles } from '@src/common/enums/roles.enum';
 import { AdminController } from '@src/common/decorators/admin-controller.decorator';
 import { ApiResponseDecorator } from '@src/common/decorators/api-response.decorator';
+import { UserRole } from '@src/modules/users/enums/user-role.enum';
 
 @ApiBearerAuth()
-@AllowedRoles([Roles.ADMIN])
+@AllowedRoles([UserRole.ADMIN])
 @UseGuards(RolesGuard)
 @AdminController({ routePrefix: 'category', tagName: 'Category' })
 export class CategoryController {
@@ -40,7 +40,7 @@ export class CategoryController {
     HttpStatus.UNAUTHORIZED,
     HttpStatus.FORBIDDEN,
   ])
-  @Get()
+  @Get(':telegramId')
   async findAll(): Promise<Category[]> {
     return this.categoryService.findAll();
   }
@@ -53,7 +53,7 @@ export class CategoryController {
     HttpStatus.NOT_FOUND,
     HttpStatus.FORBIDDEN,
   ])
-  @Get(':id')
+  @Get(':id/:telegramId')
   async findOne(@Param('id', ParseIntPipe) id: number): Promise<Category> {
     const category = await this.categoryService.findOneBy({ id });
     if (!category) {
@@ -69,7 +69,7 @@ export class CategoryController {
     HttpStatus.UNAUTHORIZED,
     HttpStatus.FORBIDDEN,
   ])
-  @Post()
+  @Post(':telegramId')
   async create(
     @Body() createCategoryDto: CreateCategoryDto,
   ): Promise<Category> {
@@ -84,7 +84,7 @@ export class CategoryController {
     HttpStatus.NOT_FOUND,
     HttpStatus.FORBIDDEN,
   ])
-  @Put(':id')
+  @Put(':id/:telegramId')
   async update(
     @Param('id', ParseIntPipe) id: number,
     @Body() updateCategoryDto: UpdateCategoryDto,
@@ -105,7 +105,7 @@ export class CategoryController {
     HttpStatus.FORBIDDEN,
   ])
   @HttpCode(HttpStatus.NO_CONTENT)
-  @Delete(':id')
+  @Delete(':id/:telegramId')
   async delete(@Param('id', ParseIntPipe) id: number): Promise<void> {
     const category = await this.categoryService.findOneBy({ id });
     if (!category) {

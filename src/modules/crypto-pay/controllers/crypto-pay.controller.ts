@@ -20,7 +20,7 @@ export class PaymentController {
     return this.paymentService.getMe();
   }
 
-  @Post('create-invoice')
+  @Post('create-invoice/:telegramId')
   @ApiResponse({
     status: 201,
     description: 'Invoice created successfully, returns the payment URL.',

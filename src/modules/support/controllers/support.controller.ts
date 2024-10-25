@@ -26,7 +26,7 @@ export class SupportController {
     { code: HttpStatus.OK, options: { type: Support } },
     HttpStatus.UNAUTHORIZED,
   ])
-  @Get()
+  @Get(':telegramId')
   async getAllSupportRequests(): Promise<Support[]> {
     return await this.supportService.findAll();
   }
@@ -37,7 +37,7 @@ export class SupportController {
     HttpStatus.UNAUTHORIZED,
     HttpStatus.NOT_FOUND,
   ])
-  @Get(':id')
+  @Get(':id/:telegramId')
   async getSupportRequest(
     @Param('id', ParseIntPipe) id: number,
   ): Promise<Support> {
@@ -50,7 +50,7 @@ export class SupportController {
     HttpStatus.UNAUTHORIZED,
     HttpStatus.BAD_REQUEST,
   ])
-  @Post()
+  @Post(':telegramId')
   async createSupportRequest(
     @Body() createSupportDto: CreateSupportDto,
   ): Promise<Support> {
@@ -63,7 +63,7 @@ export class SupportController {
     HttpStatus.UNAUTHORIZED,
     HttpStatus.NOT_FOUND,
   ])
-  @Put(':id')
+  @Put(':id/:telegramId')
   async updateSupportRequest(
     @Param('id', ParseIntPipe) id: number,
     @Body() updateSupportDto: UpdateSupportDto,
@@ -77,7 +77,7 @@ export class SupportController {
     HttpStatus.UNAUTHORIZED,
     HttpStatus.NOT_FOUND,
   ])
-  @Delete(':id')
+  @Delete(':id/:telegramId')
   async deleteSupportRequest(
     @Param('id', ParseIntPipe) id: number,
   ): Promise<void> {

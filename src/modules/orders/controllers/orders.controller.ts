@@ -47,7 +47,7 @@ export class OrderController {
     enum: OrderStatus,
     description: 'Filter orders by status',
   })
-  @Get()
+  @Get(':telegramId')
   async getAllOrders(
     @GetJwtPayload() user: IJwtPayload,
     @Query('status') status?: OrderStatus,
@@ -60,7 +60,7 @@ export class OrderController {
     { code: HttpStatus.OK, options: { type: GetAllOrdersPriceResponseDto } },
     HttpStatus.UNAUTHORIZED,
   ])
-  @Get('price')
+  @Get('price/:telegramId')
   async getPriceOfAllOrders(
     @GetJwtPayload() user: IJwtPayload,
   ): Promise<GetAllOrdersPriceResponseDto> {
@@ -74,7 +74,7 @@ export class OrderController {
     HttpStatus.UNAUTHORIZED,
     HttpStatus.NOT_FOUND,
   ])
-  @Get(':id')
+  @Get(':id/:telegramId')
   async getOrderById(
     @Param('id', ParseIntPipe) orderId: number,
   ): Promise<Order> {
@@ -88,7 +88,7 @@ export class OrderController {
     HttpStatus.UNAUTHORIZED,
     HttpStatus.BAD_REQUEST,
   ])
-  @Post()
+  @Post(':telegramId')
   async createOrder(
     @GetJwtPayload() user: IJwtPayload,
     @Body() createOrderDto: OrderItemDto,
@@ -104,7 +104,7 @@ export class OrderController {
     HttpStatus.UNAUTHORIZED,
     HttpStatus.NOT_FOUND,
   ])
-  @Put(':id')
+  @Put(':id/:telegramId')
   async updateOrder(
     @GetJwtPayload() user: IJwtPayload,
     @Param('id', ParseIntPipe) orderId: number,
@@ -120,7 +120,7 @@ export class OrderController {
     HttpStatus.UNAUTHORIZED,
     HttpStatus.NOT_FOUND,
   ])
-  @Delete(':id')
+  @Delete(':id/:telegramId')
   async deleteOrder(
     @Param('orderId', ParseIntPipe) orderId: number,
   ): Promise<void> {
@@ -135,7 +135,7 @@ export class OrderController {
     HttpStatus.NOT_FOUND,
     HttpStatus.BAD_REQUEST,
   ])
-  @Post('purchase')
+  @Post('purchase/:telegramId')
   async makePurchase(
     @GetJwtPayload() user: IJwtPayload,
     @Body() makePurchaseDto: MakePurchaseDto,

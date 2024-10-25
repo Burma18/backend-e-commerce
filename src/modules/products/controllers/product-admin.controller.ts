@@ -20,19 +20,19 @@ import {
 } from '@nestjs/common';
 import { RolesGuard } from '@src/modules/auth/guards/roles-guard';
 import { AllowedRoles } from '@src/common/decorators/allowed-roles.decorator';
-import { Roles } from '@src/common/enums/roles.enum';
 import { AdminController } from '@src/common/decorators/admin-controller.decorator';
 import { ApiResponseDecorator } from '@src/common/decorators/api-response.decorator';
 import { Product } from '../entities/product.entity';
+import { UserRole } from '@src/modules/users/enums/user-role.enum';
 
 @ApiBearerAuth()
 @AdminController({ routePrefix: 'product', tagName: 'Product' })
-@AllowedRoles([Roles.ADMIN])
+@AllowedRoles([UserRole.ADMIN])
 @UseGuards(RolesGuard)
 export class ProductAdminController {
   constructor(private readonly productService: ProductService) {}
 
-  @Get()
+  @Get(':telegramId')
   @ApiOperation({ summary: 'Retrieve all products' })
   @ApiResponseDecorator([
     { code: HttpStatus.OK, options: { type: Product } },
@@ -43,7 +43,7 @@ export class ProductAdminController {
     return await this.productService.findAll();
   }
 
-  @Post()
+  @Post(':telegramId')
   @ApiOperation({ summary: 'Create a new product' })
   @ApiResponseDecorator([
     { code: HttpStatus.OK, options: { type: Product } },
@@ -55,7 +55,7 @@ export class ProductAdminController {
     return await this.productService.createProduct(createProductDto);
   }
 
-  @Get(':id')
+  @Get(':id/:telegramId')
   @ApiOperation({ summary: 'Retrieve product by ID' })
   @ApiResponseDecorator([
     { code: HttpStatus.OK, options: { type: Product } },
@@ -68,7 +68,7 @@ export class ProductAdminController {
     return await this.productService.findById(id);
   }
 
-  @Put(':id')
+  @Put(':id/:telegramId')
   @ApiOperation({ summary: 'Update an existing product' })
   @ApiResponseDecorator([
     { code: HttpStatus.OK, options: { type: Product } },
@@ -89,7 +89,7 @@ export class ProductAdminController {
     return await this.productService.update(id, updateProductDto);
   }
 
-  @Delete(':id')
+  @Delete(':id/:telegramId')
   @ApiResponseDecorator([
     { code: HttpStatus.OK, options: { type: Product } },
     HttpStatus.UNAUTHORIZED,

@@ -16,12 +16,12 @@ import { UpdateSupportDto } from '../dto/update-support.dto';
 import { Support } from '../entities/support.entity';
 import { RolesGuard } from '@src/modules/auth/guards/roles-guard';
 import { AllowedRoles } from '@src/common/decorators/allowed-roles.decorator';
-import { Roles } from '@src/common/enums/roles.enum';
 import { AdminController } from '@src/common/decorators/admin-controller.decorator';
 import { ApiResponseDecorator } from '@src/common/decorators/api-response.decorator';
+import { UserRole } from '@src/modules/users/enums/user-role.enum';
 
 @ApiBearerAuth()
-@AllowedRoles([Roles.ADMIN])
+@AllowedRoles([UserRole.ADMIN])
 @UseGuards(RolesGuard)
 @AdminController({ routePrefix: 'support', tagName: 'Support' })
 export class SupportAdminController {
@@ -33,7 +33,7 @@ export class SupportAdminController {
     HttpStatus.UNAUTHORIZED,
     HttpStatus.FORBIDDEN,
   ])
-  @Get()
+  @Get(':telegramId')
   async getAllSupportRequests(): Promise<Support[]> {
     return await this.supportService.findAll();
   }
@@ -45,7 +45,7 @@ export class SupportAdminController {
     HttpStatus.NOT_FOUND,
     HttpStatus.FORBIDDEN,
   ])
-  @Get(':id')
+  @Get(':id/:telegramId')
   async getSupportRequest(
     @Param('id', ParseIntPipe) id: number,
   ): Promise<Support> {
@@ -59,7 +59,7 @@ export class SupportAdminController {
     HttpStatus.BAD_REQUEST,
     HttpStatus.FORBIDDEN,
   ])
-  @Post()
+  @Post(':telegramId')
   async createSupportRequest(
     @Body() createSupportDto: CreateSupportDto,
   ): Promise<Support> {
@@ -73,7 +73,7 @@ export class SupportAdminController {
     HttpStatus.NOT_FOUND,
     HttpStatus.FORBIDDEN,
   ])
-  @Put(':id')
+  @Put(':id/:telegramId')
   async updateSupportRequest(
     @Param('id', ParseIntPipe) id: number,
     @Body() updateSupportDto: UpdateSupportDto,
@@ -88,7 +88,7 @@ export class SupportAdminController {
     HttpStatus.NOT_FOUND,
     HttpStatus.FORBIDDEN,
   ])
-  @Delete(':id')
+  @Delete(':id/:telegramId')
   async deleteSupportRequest(@Param('id') id: number): Promise<void> {
     await this.supportService.remove(id);
   }

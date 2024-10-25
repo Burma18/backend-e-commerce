@@ -21,12 +21,12 @@ import {
 } from '@nestjs/swagger';
 import { RolesGuard } from '@src/modules/auth/guards/roles-guard';
 import { AllowedRoles } from '@src/common/decorators/allowed-roles.decorator';
-import { Roles } from '@src/common/enums/roles.enum';
 import { AdminController } from '@src/common/decorators/admin-controller.decorator';
 import { ApiResponseDecorator } from '@src/common/decorators/api-response.decorator';
+import { UserRole } from '@src/modules/users/enums/user-role.enum';
 
 @ApiBearerAuth()
-@AllowedRoles([Roles.ADMIN])
+@AllowedRoles([UserRole.ADMIN])
 @UseGuards(RolesGuard)
 @AdminController({ routePrefix: 'order', tagName: 'Order' })
 export class OrderAdminController {
@@ -35,7 +35,7 @@ export class OrderAdminController {
   @ApiOperation({ summary: 'Get all orders' })
   @ApiResponse({ status: 200, description: 'Orders retrieved successfully.' })
   @ApiForbiddenResponse({ description: 'Access denied. Admins only.' })
-  @Get()
+  @Get(':telegramId')
   async getAllOrders(): Promise<Order[]> {
     return this.orderService.findAll();
   }
@@ -45,7 +45,7 @@ export class OrderAdminController {
   @ApiResponse({ status: 200, description: 'Order retrieved successfully.' })
   @ApiResponse({ status: 404, description: 'Order not found.' })
   @ApiForbiddenResponse({ description: 'Access denied. Admins only.' })
-  @Get(':id')
+  @Get(':id/:telegramId')
   async getOrderById(@Param('id', ParseIntPipe) id: number): Promise<Order> {
     return this.orderService.findOne(id);
   }
@@ -56,7 +56,7 @@ export class OrderAdminController {
   @ApiResponse({ status: 200, description: 'Order updated successfully.' })
   @ApiResponse({ status: 404, description: 'Order not found.' })
   @ApiForbiddenResponse({ description: 'Access denied. Admins only.' })
-  @Put(':id')
+  @Put(':id/:telegramId')
   async updateOrder(
     @Param('id', ParseIntPipe) id: number,
     @Body() updateOrderDto: UpdateOrderDto,
@@ -69,7 +69,7 @@ export class OrderAdminController {
   @ApiResponse({ status: 200, description: 'Order deleted successfully.' })
   @ApiResponse({ status: 404, description: 'Order not found.' })
   @ApiForbiddenResponse({ description: 'Access denied. Admins only.' })
-  @Delete(':id')
+  @Delete(':id/:telegramId')
   async deleteOrder(@Param('id', ParseIntPipe) id: number): Promise<void> {
     return this.orderService.delete(id);
   }
@@ -80,7 +80,7 @@ export class OrderAdminController {
     HttpStatus.UNAUTHORIZED,
     HttpStatus.FORBIDDEN,
   ])
-  @Get('userOrder/:id')
+  @Get('userOrder/:id/:telegramId')
   async getAllOrdersOfUser(
     @Param('id', ParseIntPipe) id: number,
   ): Promise<Order[]> {

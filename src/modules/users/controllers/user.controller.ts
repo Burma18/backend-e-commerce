@@ -19,7 +19,7 @@ export class UserController {
     HttpStatus.UNAUTHORIZED,
     HttpStatus.NOT_FOUND,
   ])
-  @Get('me')
+  @Get('me/:telegramId')
   async getMe(@GetJwtPayload() user: IJwtPayload): Promise<User> {
     return this.userService.getMe(user.id);
   }
@@ -30,7 +30,7 @@ export class UserController {
     HttpStatus.NOT_FOUND,
     HttpStatus.UNAUTHORIZED,
   ])
-  @Put('me')
+  @Put('me/:telegramId')
   update(
     @GetJwtPayload() user: IJwtPayload,
     @Body() updateUserDto: UpdateUserDto,

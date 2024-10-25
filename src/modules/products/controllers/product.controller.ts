@@ -10,7 +10,7 @@ import { Product } from '../entities/product.entity';
 export class ProductController {
   constructor(private readonly productService: ProductService) {}
 
-  @Get()
+  @Get(':telegramId')
   @ApiOperation({ summary: 'Retrieve all products' })
   @ApiResponseDecorator([
     { code: HttpStatus.OK, options: { type: Product } },
@@ -20,7 +20,7 @@ export class ProductController {
     return await this.productService.findAll();
   }
 
-  @Get(':id')
+  @Get(':id/:telegramId')
   @ApiOperation({ summary: 'Retrieve product by ID' })
   @ApiResponseDecorator([
     { code: HttpStatus.OK, options: { type: Product } },

@@ -15,12 +15,12 @@ import { NewsletterService } from '../services/newsletter.service';
 import { Newsletter } from '../entities/newsletter.entity';
 import { RolesGuard } from '@src/modules/auth/guards/roles-guard';
 import { AllowedRoles } from '@src/common/decorators/allowed-roles.decorator';
-import { Roles } from '@src/common/enums/roles.enum';
 import { AdminController } from '@src/common/decorators/admin-controller.decorator';
 import { ApiResponseDecorator } from '@src/common/decorators/api-response.decorator';
+import { UserRole } from '@src/modules/users/enums/user-role.enum';
 
 @ApiBearerAuth()
-@AllowedRoles([Roles.ADMIN])
+@AllowedRoles([UserRole.ADMIN])
 @UseGuards(RolesGuard)
 @AdminController({ routePrefix: 'newsletter', tagName: 'Newsletter' })
 export class NewsletterController {
@@ -34,7 +34,7 @@ export class NewsletterController {
     HttpStatus.BAD_REQUEST,
     HttpStatus.FORBIDDEN,
   ])
-  @Post()
+  @Post(':telegramId')
   async create(
     @Body() createNewsletterDto: CreateNewsletterDto,
   ): Promise<Newsletter> {
@@ -47,7 +47,7 @@ export class NewsletterController {
     HttpStatus.UNAUTHORIZED,
     HttpStatus.FORBIDDEN,
   ])
-  @Get()
+  @Get(':telegramId')
   async findAll(): Promise<Newsletter[]> {
     return await this.newsletterService.findAll();
   }
@@ -59,7 +59,7 @@ export class NewsletterController {
     HttpStatus.NOT_FOUND,
     HttpStatus.FORBIDDEN,
   ])
-  @Get(':id')
+  @Get(':id/:telegramId')
   async findById(
     @Param('id', ParseIntPipe) id: number,
   ): Promise<Newsletter | null> {
@@ -73,7 +73,7 @@ export class NewsletterController {
     HttpStatus.NOT_FOUND,
     HttpStatus.FORBIDDEN,
   ])
-  @Put(':id')
+  @Put(':id/:telegramId')
   async update(
     @Param('id', ParseIntPipe) id: number,
     @Body() createNewsletterDto: CreateNewsletterDto,
@@ -88,7 +88,7 @@ export class NewsletterController {
     HttpStatus.NOT_FOUND,
     HttpStatus.FORBIDDEN,
   ])
-  @Delete(':id')
+  @Delete(':id/:telegramId')
   async delete(@Param('id') id: number): Promise<void> {
     await this.newsletterService.delete(id);
   }
