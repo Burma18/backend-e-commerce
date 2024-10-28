@@ -38,6 +38,7 @@ export class TelegramGuard implements CanActivate {
       throw new ForbiddenException('User not found');
     }
 
+    console.log('user :', user);
     const jwtPayload: IJwtPayload = {
       id: user.id,
       role: user.role,

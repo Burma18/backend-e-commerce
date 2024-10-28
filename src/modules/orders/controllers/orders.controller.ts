@@ -121,10 +121,8 @@ export class OrderController {
     HttpStatus.NOT_FOUND,
   ])
   @Delete(':id/:telegramId')
-  async deleteOrder(
-    @Param('orderId', ParseIntPipe) orderId: number,
-  ): Promise<void> {
-    return await this.orderService.delete(orderId);
+  async deleteOrder(@Param('id', ParseIntPipe) id: number): Promise<void> {
+    return await this.orderService.delete(id);
   }
 
   @ApiOperation({ summary: 'Make a purchase' })
