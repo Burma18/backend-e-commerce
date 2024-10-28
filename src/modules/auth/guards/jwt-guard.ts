@@ -1,42 +1,42 @@
-import {
-  Injectable,
-  CanActivate,
-  ExecutionContext,
-  UnauthorizedException,
-} from '@nestjs/common';
-import { AuthService } from '../services/auth.service';
+// import {
+//   Injectable,
+//   CanActivate,
+//   ExecutionContext,
+//   UnauthorizedException,
+// } from '@nestjs/common';
+// import { AuthService } from '../services/auth.service';
 
-@Injectable()
-export class JwtGuard implements CanActivate {
-  constructor(private readonly authService: AuthService) {}
+// @Injectable()
+// export class JwtGuard implements CanActivate {
+//   constructor(private readonly authService: AuthService) {}
 
-  async canActivate(context: ExecutionContext): Promise<boolean> {
-    const request = context.switchToHttp().getRequest();
+//   async canActivate(context: ExecutionContext): Promise<boolean> {
+//     const request = context.switchToHttp().getRequest();
 
-    const excludedPaths = [
-      '/api/v1/auth/start',
-      '/api/v1/auth',
-      '/api/v1/payment/handle-payment',
-    ];
+//     const excludedPaths = [
+//       '/api/v1/auth/start',
+//       '/api/v1/auth',
+//       '/api/v1/payment/handle-payment',
+//     ];
 
-    if (excludedPaths.includes(request.url)) {
-      console.log('skipping guards');
-      return true;
-    }
+//     if (excludedPaths.includes(request.url)) {
+//       console.log('skipping guards');
+//       return true;
+//     }
 
-    const token = request.cookies['session'];
+//     const token = request.cookies['session'];
 
-    if (!token) {
-      throw new UnauthorizedException('Token not found');
-    }
+//     if (!token) {
+//       throw new UnauthorizedException('Token not found');
+//     }
 
-    const user = await this.authService.validateToken(token);
+//     const user = await this.authService.validateToken(token);
 
-    if (!user) {
-      throw new UnauthorizedException('Invalid token');
-    }
+//     if (!user) {
+//       throw new UnauthorizedException('Invalid token');
+//     }
 
-    request.user = user;
-    return true;
-  }
-}
+//     request.user = user;
+//     return true;
+//   }
+// }
