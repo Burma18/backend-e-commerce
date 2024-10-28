@@ -14,6 +14,18 @@ export class TelegramGuard implements CanActivate {
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest<IRequestWithUser>();
+
+    const excludedPaths = [
+      '/api/v1/auth/start',
+      '/api/v1/auth',
+      '/api/v1/payment/handle-payment',
+    ];
+
+    if (excludedPaths.includes(request.url)) {
+      console.log('skipping guards');
+      return true;
+    }
+
     const telegramId = request.params.telegramId || request.body.telegramId;
 
     if (!telegramId) {

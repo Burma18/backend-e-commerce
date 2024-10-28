@@ -1,6 +1,5 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { User } from '@src/modules/users/entities/user.entity';
 import { UserRole } from '@src/modules/users/enums/user-role.enum';
 import { UserService } from '@src/modules/users/services/user.service';
 import { StartDto } from '../dto/start-app.dto';
@@ -15,19 +14,21 @@ export class AuthService {
   async start(startDto: StartDto) {
     const { telegramId, username } = startDto;
 
-    let user = await this.userService.findByTelegramId(telegramId);
+    console.log(telegramId, username);
+
+    const parsedTelegramId = telegramId.toString();
+
+    let user = await this.userService.findByTelegramId(parsedTelegramId);
 
     if (!user) {
       user = await this.userService.create({
-        telegramId,
+        telegramId: telegramId,
         username,
         role: UserRole.USER,
       });
     }
 
-    const token = this.generateToken(user);
-
-    return { token, role: user.role };
+    return { role: user.role };
   }
 
   async validateToken(token: string) {
@@ -40,7 +41,7 @@ export class AuthService {
     }
   }
 
-  private generateToken(user: User): string {
-    return this.jwtService.sign({ id: user.id, role: user.role });
-  }
+  // private generateToken(user: User): string {
+  //   return this.jwtService.sign({ id: user.id, role: user.role });
+  // }
 }

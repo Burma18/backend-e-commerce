@@ -25,26 +25,17 @@ export class AuthController {
   ])
   async start(@Body() startDto: StartDto, @Res() res: Response) {
     const result = await this.authService.start(startDto);
-    res.cookie('session', result.token, {
-      httpOnly: true,
-      secure: true,
-    });
     return res.json({ role: result.role });
   }
 
   @ApiOperation({ summary: 'Create a new user' })
   @ApiResponseDecorator([{ code: HttpStatus.OK, options: { type: User } }])
-  @Post('')
+  @Post()
   async create(@Body() createUserDto: CreateUserDto, @Res() res: Response) {
     const newUser = await this.userService.create(createUserDto);
     const result = await this.authService.start({
-      telegramId: newUser.telegramId,
+      telegramId: parseInt(newUser.telegramId),
       username: newUser.username,
-    });
-
-    res.cookie('session', result.token, {
-      httpOnly: true,
-      secure: true,
     });
 
     return res.json({ role: result.role });

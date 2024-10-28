@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmpty, IsOptional, IsString } from 'class-validator';
+import { IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator';
 import { UserRole } from '@src/modules/users/enums/user-role.enum';
 
 export class CreateUserDto {
@@ -10,8 +10,8 @@ export class CreateUserDto {
 
   @ApiProperty({ description: 'Telegram ID of the user' })
   @IsNotEmpty()
-  @IsString()
-  telegramId: string;
+  @IsNumber()
+  telegramId: number;
 
   @ApiProperty({ description: 'Balance of the user', required: false })
   @IsOptional()

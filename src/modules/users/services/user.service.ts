@@ -20,7 +20,14 @@ export class UserService {
   }
 
   async create(createUserDto: CreateUserDto): Promise<User> {
-    const user = this.repository.create(createUserDto);
+    const telegramIdParsed = createUserDto.telegramId.toString();
+
+    const updatedDto = {
+      ...createUserDto,
+      telegramId: telegramIdParsed,
+    } as Omit<CreateUserDto, 'telegramId'>;
+
+    const user = this.repository.create(updatedDto);
     return this.repository.save(user);
   }
 

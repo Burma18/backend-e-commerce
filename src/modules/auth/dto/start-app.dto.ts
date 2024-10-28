@@ -1,11 +1,11 @@
-import { IsNotEmpty, IsString } from 'class-validator';
+import { IsNotEmpty, IsNumber, IsString } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class StartDto {
   @ApiProperty({ description: 'The Telegram ID of the user' })
-  @IsString()
+  @IsNumber()
   @IsNotEmpty()
-  telegramId: string;
+  telegramId: number;
 
   @ApiProperty({ description: 'The username of the user' })
   @IsString()
