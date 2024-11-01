@@ -32,6 +32,9 @@ export class User implements IUser {
   @Column({ default: false })
   isBlocked: boolean;
 
+  @Column({ default: true })
+  receiveNewsletter: boolean;
+
   @CreateDateColumn()
   registrationDate: Date;
 

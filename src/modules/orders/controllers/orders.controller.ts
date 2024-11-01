@@ -136,11 +136,7 @@ export class OrderController {
   @Post('purchase')
   async makePurchase(
     @GetJwtPayload() user: IJwtPayload,
-    @Body() makePurchaseDto: MakePurchaseDto,
   ): Promise<MakePurchaseOverallResponse> {
-    return await this.orderService.makePurchase(
-      user.id,
-      makePurchaseDto.orderIds,
-    );
+    return await this.orderService.makePurchase(user.id);
   }
 }

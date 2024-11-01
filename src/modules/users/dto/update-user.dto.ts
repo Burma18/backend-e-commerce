@@ -35,4 +35,12 @@ export class UpdateUserDto {
   @IsNotEmpty()
   @IsNumber()
   telegramId: number;
+
+  @ApiProperty({
+    description: 'Status indicating if user wants to receive newsletter',
+    required: false,
+  })
+  @IsOptional()
+  @IsBoolean()
+  receiveNewsletter: boolean;
 }

@@ -31,8 +31,16 @@ export class UserService {
     return this.repository.save(user);
   }
 
-  async findAll(): Promise<User[]> {
-    return this.repository.find();
+  async findAll(filter?: { receiveNewsletter?: boolean }): Promise<User[]> {
+    const query = this.repository.createQueryBuilder('user');
+
+    if (filter && typeof filter.receiveNewsletter === 'boolean') {
+      query.where('user.receiveNewsletter = :receiveNewsletter', {
+        receiveNewsletter: filter.receiveNewsletter,
+      });
+    }
+
+    return query.getMany();
   }
 
   async findOneBy(options: FindOptionsWhere<User>): Promise<User> {

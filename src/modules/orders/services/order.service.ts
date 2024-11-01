@@ -4,7 +4,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectEntityManager } from '@nestjs/typeorm';
-import { EntityManager, In, Repository } from 'typeorm';
+import { EntityManager, Repository } from 'typeorm';
 import { Order } from '@src/modules/orders/entities/order.entity';
 import { UpdateOrderDto } from '../dto/update-order.dto';
 import { OrderItemDto } from '../dto/order-item.dto';
@@ -162,20 +162,8 @@ export class OrderService {
     await this.repository.delete(id);
   }
 
-  async makePurchase(
-    userId: number,
-    orderIds: number[],
-  ): Promise<MakePurchaseOverallResponse> {
-    const orders = await this.repository.find({
-      where: {
-        id: In(orderIds),
-      },
-      relations: ['items', 'items.product'],
-    });
-
-    if (orders.length !== orderIds.length) {
-      throw new NotFoundException(`One or more orders not found`);
-    }
+  async makePurchase(userId: number): Promise<MakePurchaseOverallResponse> {
+    const orders = await this.findAllByUser(userId, OrderStatus.PENDING);
 
     const { balance } = await this.userService.getUserBalance(userId);
     const totalAmount = orders.reduce(
