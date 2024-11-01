@@ -18,6 +18,9 @@ export class Product {
   @Column({ type: 'decimal' })
   price: number;
 
+  @Column({ type: 'int', nullable: false })
+  categoryId: number;
+
   @ManyToOne(() => Category, (category) => category.products)
   category: Category;
 }
