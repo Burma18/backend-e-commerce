@@ -22,9 +22,17 @@ export class PaymentService {
     private readonly userService: UserService,
   ) {
     this.paymentRepository = this.entityManager.getRepository(Payment);
-    const token = environment.payment.cryptoPayToken;
+    const token =
+      environment.app.env === 'prod'
+        ? environment.payment.cryptoPayTokenProd
+        : environment.payment.cryptoPayTokenTest;
+    const hostName =
+      environment.app.env === 'prod'
+        ? environment.payment.hostNameProd
+        : environment.payment.hostNameTest;
+
     this.cryptoPay = new CryptoPay(token, {
-      hostname: 'testnet-pay.crypt.bot',
+      hostname: hostName,
       protocol: 'https',
     });
   }

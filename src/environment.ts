@@ -17,6 +17,9 @@ export const environment = {
     name: env.get('POSTGRES_DB').required().asString(),
   },
   payment: {
-    cryptoPayToken: env.get('CRYPTO_PAY_TOKEN').required().asString(),
+    cryptoPayTokenTest: env.get('CRYPTO_PAY_TOKEN_TEST').required().asString(),
+    cryptoPayTokenProd: env.get('CRYPTO_PAY_TOKEN_PROD').required().asString(),
+    hostNameTest: env.get('HOST_NAME_TEST').required().asString(),
+    hostNameProd: env.get('HOST_NAME_PROD').required().asString(),
   },
 };
