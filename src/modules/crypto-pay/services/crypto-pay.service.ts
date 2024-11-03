@@ -62,7 +62,7 @@ export class PaymentService {
 
     try {
       const invoice: Invoice = await this.cryptoPay.createInvoice(
-        'TON',
+        'USDT',
         amount,
         {
           description: 'Пополнение баланса',
