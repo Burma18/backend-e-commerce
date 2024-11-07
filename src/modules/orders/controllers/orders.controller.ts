@@ -133,10 +133,29 @@ export class OrderController {
     HttpStatus.NOT_FOUND,
     HttpStatus.BAD_REQUEST,
   ])
+  @Post('purchaseAll')
+  async makePurchaseAll(
+    @GetJwtPayload() user: IJwtPayload,
+  ): Promise<MakePurchaseOverallResponse> {
+    return await this.orderService.makePurchaseAllOrders(user.id);
+  }
+
+  @ApiOperation({ summary: 'Make a purchase' })
+  @ApiBody({ type: MakePurchaseDto })
+  @ApiResponseDecorator([
+    { code: HttpStatus.OK, options: { type: MakePurchaseOverallResponse } },
+    HttpStatus.UNAUTHORIZED,
+    HttpStatus.NOT_FOUND,
+    HttpStatus.BAD_REQUEST,
+  ])
   @Post('purchase')
   async makePurchase(
     @GetJwtPayload() user: IJwtPayload,
+    @Body() makePurchaseDto: MakePurchaseDto,
   ): Promise<MakePurchaseOverallResponse> {
-    return await this.orderService.makePurchase(user.id);
+    return await this.orderService.makePurchase(
+      user.id,
+      makePurchaseDto.orderIds,
+    );
   }
 }

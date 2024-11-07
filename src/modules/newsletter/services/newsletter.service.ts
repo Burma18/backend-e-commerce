@@ -47,6 +47,6 @@ export class NewsletterService {
   }
 
   async delete(id: number): Promise<void> {
-    await this.newsletterRepository.delete(id);
+    await this.newsletterRepository.softDelete(id);
   }
 }

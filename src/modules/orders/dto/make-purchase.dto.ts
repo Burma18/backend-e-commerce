@@ -1,12 +1,18 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { ProductResponseDto } from '@src/modules/products/dto/create-product.dto';
-import { IsNotEmpty, IsNumber } from 'class-validator';
+import { IsArray, IsNotEmpty, IsNumber } from 'class-validator';
 
 export class MakePurchaseDto {
   @ApiProperty({ description: 'Telegram Id of the user' })
   @IsNotEmpty()
   @IsNumber()
   telegramId: number;
+
+  @ApiProperty({ type: [Number], description: 'Array of order IDs' })
+  @IsNotEmpty()
+  @IsArray()
+  @IsNumber({}, { each: true })
+  orderIds: number[];
 }
 
 export class MakePurchaseResponse {

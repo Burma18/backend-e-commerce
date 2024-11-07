@@ -4,7 +4,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectEntityManager } from '@nestjs/typeorm';
-import { EntityManager, Repository } from 'typeorm';
+import { EntityManager, In, Repository } from 'typeorm';
 import { Order } from '@src/modules/orders/entities/order.entity';
 import { UpdateOrderDto } from '../dto/update-order.dto';
 import { OrderItemDto } from '../dto/order-item.dto';
@@ -159,10 +159,12 @@ export class OrderService {
   }
 
   async delete(id: number): Promise<void> {
-    await this.repository.delete(id);
+    await this.repository.softDelete(id);
   }
 
-  async makePurchase(userId: number): Promise<MakePurchaseOverallResponse> {
+  async makePurchaseAllOrders(
+    userId: number,
+  ): Promise<MakePurchaseOverallResponse> {
     const orders = await this.findAllByUser(userId, OrderStatus.PENDING);
 
     const { balance } = await this.userService.getUserBalance(userId);
@@ -170,6 +172,63 @@ export class OrderService {
       (sum, order) => sum + Number(order.totalPrice),
       0,
     );
+
+    if (parseFloat(balance) < totalAmount) {
+      throw new BadRequestException(
+        `Недостаточно средств на балансе. Пополните, пожалуйста, ваш баланс.`,
+      );
+    }
+
+    const updatedBalance = parseFloat(balance) - totalAmount;
+
+    await this.userService.addUserBalance(userId, -totalAmount);
+
+    const purchaseResponses = await Promise.all(
+      orders.map(async (order) => {
+        order.status = OrderStatus.PAID;
+        await this.repository.save(order);
+
+        return {
+          orderId: order.id,
+          totalPrice: order.totalPrice,
+          products: order.items.map((item) => ({
+            productId: item.product.id,
+            name: item.product.name,
+            quantity: item.quantity,
+            price: item.product.price,
+            credentials: item.product.credentials,
+          })),
+        };
+      }),
+    );
+
+    return {
+      purchases: purchaseResponses,
+      remainingBalance: updatedBalance.toString(),
+    };
+  }
+
+  async makePurchase(
+    userId: number,
+    orderIds: number[],
+  ): Promise<MakePurchaseOverallResponse> {
+    const orders = await this.repository.find({
+      where: {
+        id: In(orderIds),
+      },
+      relations: ['items', 'items.product'],
+    });
+
+    if (orders.length !== orderIds.length) {
+      throw new NotFoundException(`One or more orders not found`);
+    }
+
+    const totalAmount = orders.reduce(
+      (sum, order) => sum + Number(order.totalPrice),
+      0,
+    );
+
+    const { balance } = await this.userService.getUserBalance(userId);
 
     if (parseFloat(balance) < totalAmount) {
       throw new BadRequestException(

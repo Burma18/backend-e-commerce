@@ -10,8 +10,6 @@ export class AuthService {
   async start(startDto: StartDto) {
     const { telegramId, username } = startDto;
 
-    console.log(telegramId, username);
-
     const parsedTelegramId = telegramId.toString();
 
     let user = await this.userService.findByTelegramId(parsedTelegramId);
