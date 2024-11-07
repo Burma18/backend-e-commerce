@@ -1,4 +1,4 @@
-import { Post, Body, Res, HttpStatus } from '@nestjs/common';
+import { Post, Body, Res, HttpStatus, Put } from '@nestjs/common';
 import { Response } from 'express';
 import { AuthService } from '../services/auth.service';
 import { StartDto } from '../dto/start-app.dto';
@@ -8,6 +8,7 @@ import { User } from '@src/modules/users/entities/user.entity';
 import { CreateUserDto } from '@src/modules/users/dto/create-user.dto';
 import { UserService } from '@src/modules/users/services/user.service';
 import { WebController } from '@src/common/decorators/web-controller.decorator';
+import { UpdateUserDto } from '@src/modules/users/dto/update-user.dto';
 
 @ApiTags('Auth')
 @WebController({ routePrefix: 'auth', tagName: 'Auth' })
@@ -39,5 +40,15 @@ export class AuthController {
     });
 
     return res.json({ role: result.role });
+  }
+
+  @ApiOperation({ summary: 'Update user details' })
+  @ApiResponseDecorator([
+    { code: HttpStatus.OK, options: { type: User } },
+    HttpStatus.NOT_FOUND,
+  ])
+  @Put()
+  update(@Body() updateUserDto: UpdateUserDto) {
+    return this.userService.update(updateUserDto);
   }
 }

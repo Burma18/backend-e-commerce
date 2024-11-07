@@ -61,11 +61,15 @@ export class UserService {
     return user;
   }
 
-  async update(id: number, dto: UpdateUserDto): Promise<User> {
+  async update(dto: UpdateUserDto): Promise<User> {
     const updatedDto = { ...dto } as Omit<UpdateUserDto, 'telegramId'>;
 
-    await this.repository.update(id, updatedDto);
-    return this.findOneBy({ id });
+    await this.repository.update(
+      { telegramId: dto.telegramId.toString() },
+      updatedDto,
+    );
+
+    return this.findOneBy({ telegramId: dto.telegramId.toString() });
   }
 
   async remove(id: number): Promise<void> {

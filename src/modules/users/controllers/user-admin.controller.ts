@@ -57,13 +57,11 @@ export class UserAdminController {
     HttpStatus.NOT_FOUND,
     HttpStatus.FORBIDDEN,
   ])
-  @Put(':id')
-  update(
-    @Param('id', ParseIntPipe) id: number,
-    @Body() updateUserDto: UpdateUserDto,
-  ) {
-    return this.userService.update(id, updateUserDto);
+  @Put()
+  update(@Body() updateUserDto: UpdateUserDto) {
+    return this.userService.update(updateUserDto);
   }
+
   @ApiOperation({ summary: 'Delete user by ID' })
   @ApiResponseDecorator([
     { code: HttpStatus.OK, options: { type: User } },
