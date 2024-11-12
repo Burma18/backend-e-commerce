@@ -73,15 +73,4 @@ export class UserAdminController {
   remove(@Param('id', ParseIntPipe) id: number) {
     return this.userService.remove(id);
   }
-
-  @ApiOperation({ summary: 'Get admin statistics' })
-  @ApiResponseDecorator([
-    { code: HttpStatus.OK, options: { type: User } },
-    HttpStatus.UNAUTHORIZED,
-    HttpStatus.FORBIDDEN,
-  ])
-  @Get('statistics/:telegramId')
-  async getStatistics() {
-    return this.userService.getStatistics();
-  }
 }
