@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  ConflictException,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
@@ -67,9 +68,49 @@ export class OrderService {
     return order;
   }
 
-  async create(userId: number, createOrderDto: OrderItemDto): Promise<Order> {
-    const orderItem = this.mapOrderItems(createOrderDto);
+  async findOrderByUserAndProduct(
+    userId?: number,
+    productId?: number,
+  ): Promise<Order> {
+    const queryBuilder = this.repository
+      .createQueryBuilder('order')
+      .leftJoinAndSelect('order.items', 'orderItem')
+      .leftJoinAndSelect('orderItem.product', 'product');
 
+    if (userId) {
+      queryBuilder.andWhere('order.userId = :userId', { userId });
+    }
+
+    if (productId) {
+      queryBuilder.andWhere('orderItem.productId = :productId', { productId });
+    }
+
+    const order = await queryBuilder.getOne();
+
+    if (!order) {
+      throw new NotFoundException('Order not found!');
+    }
+
+    return order;
+  }
+
+  async create(userId: number, createOrderDto: OrderItemDto): Promise<Order> {
+    const { productId } = createOrderDto;
+
+    const existingOrder = await this.repository
+      .createQueryBuilder('order')
+      .leftJoinAndSelect('order.items', 'orderItem')
+      .where('order.userId = :userId', { userId })
+      .andWhere('orderItem.productId = :productId', { productId })
+      .getOne();
+
+    if (existingOrder) {
+      throw new ConflictException(
+        'An order with this product already exists for this user.',
+      );
+    }
+
+    const orderItem = this.mapOrderItems(createOrderDto);
     const totalPrice = await this.calculateTotalPrice(orderItem);
 
     const newOrder = this.entityManager.create(Order, {

@@ -5,6 +5,7 @@ import {
   ManyToOne,
   OneToMany,
   JoinColumn,
+  DeleteDateColumn,
 } from 'typeorm';
 import { User } from '@src/modules/users/entities/user.entity';
 import { OrderItem } from './order-item.entity';
@@ -42,4 +43,7 @@ export class Order {
     cascade: true,
   })
   items: OrderItem[];
+
+  @DeleteDateColumn()
+  deletedAt?: Date;
 }

@@ -1,6 +1,7 @@
 import {
   Column,
   CreateDateColumn,
+  DeleteDateColumn,
   Entity,
   OneToMany,
   PrimaryGeneratedColumn,
@@ -49,4 +50,7 @@ export class User implements IUser {
 
   @OneToMany(() => Support, (support) => support.user)
   supportRequests: Support[];
+
+  @DeleteDateColumn()
+  deletedAt?: Date;
 }

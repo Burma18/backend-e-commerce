@@ -4,6 +4,7 @@ import {
   Column,
   ManyToOne,
   JoinColumn,
+  DeleteDateColumn,
 } from 'typeorm';
 import { User } from '@src/modules/users/entities/user.entity';
 import { NewsletterStatus } from '../enum/newsletter-status.enum';
@@ -29,4 +30,7 @@ export class Newsletter {
 
   @Column({ type: 'timestamp', nullable: true })
   sentAt: Date;
+
+  @DeleteDateColumn()
+  deletedAt?: Date;
 }

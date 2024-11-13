@@ -4,6 +4,7 @@ import {
   Column,
   ManyToOne,
   JoinColumn,
+  DeleteDateColumn,
 } from 'typeorm';
 import { Order } from './order.entity';
 import { Product } from '@src/modules/products/entities/product.entity';
@@ -25,4 +26,7 @@ export class OrderItem {
 
   @Column()
   quantity: number;
+
+  @DeleteDateColumn()
+  deletedAt?: Date;
 }

@@ -55,6 +55,28 @@ export class OrderController {
     return await this.orderService.findAllByUser(user.id, status);
   }
 
+  @ApiOperation({ summary: 'Get all orders for user' })
+  @ApiResponseDecorator([
+    { code: HttpStatus.OK, options: { type: Order } },
+    HttpStatus.UNAUTHORIZED,
+  ])
+  @ApiQuery({
+    name: 'status',
+    required: false,
+    enum: OrderStatus,
+    description: 'Filter orders by status',
+  })
+  @Get('product/:id/:telegramId')
+  async getOrdersByProduct(
+    @GetJwtPayload() user: IJwtPayload,
+    @Param('id', ParseIntPipe) productId?: number,
+  ): Promise<Order> {
+    return await this.orderService.findOrderByUserAndProduct(
+      user.id,
+      productId,
+    );
+  }
+
   @ApiOperation({ summary: 'Get all orders price for user' })
   @ApiResponseDecorator([
     { code: HttpStatus.OK, options: { type: GetAllOrdersPriceResponseDto } },
