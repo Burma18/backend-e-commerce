@@ -150,10 +150,21 @@ export class OrderService {
   ): Promise<Order> {
     const order = await this.findOne(id, userId);
 
-    if (updateOrderDto.orderItems) {
-      order.items = this.mapOrderItems(updateOrderDto.orderItems);
-      order.totalPrice = await this.calculateTotalPrice(order.items);
+    if (updateOrderDto.productId !== undefined) {
+      const orderItem = order.items.find(
+        (item) => item.product.id === updateOrderDto.productId,
+      );
+
+      if (!orderItem) {
+        throw new NotFoundException('Order item not found!');
+      }
+
+      if (updateOrderDto.quantity !== undefined) {
+        orderItem.quantity = updateOrderDto.quantity;
+      }
     }
+
+    order.totalPrice = await this.calculateTotalPrice(order.items);
 
     return await this.repository.save(order);
   }

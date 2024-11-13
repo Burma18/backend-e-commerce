@@ -1,27 +1,25 @@
-import {
-  IsOptional,
-  IsArray,
-  ValidateNested,
-  IsNotEmpty,
-  IsNumber,
-} from 'class-validator';
-import { Type } from 'class-transformer';
+import { IsNotEmpty, IsNumber, IsOptional } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { OrderItemDto } from './order-item.dto';
 
 export class UpdateOrderDto {
-  @ApiPropertyOptional({
-    type: [OrderItemDto],
-    description: 'Updated list of order items',
-  })
-  @IsOptional()
-  @IsArray()
-  @ValidateNested({ each: true })
-  @Type(() => OrderItemDto)
-  orderItems?: OrderItemDto[];
-
-  @ApiProperty({ description: 'Telegram Id of the user' })
+  @ApiProperty({ description: 'Telegram ID of the user' })
   @IsNotEmpty()
   @IsNumber()
   telegramId: number;
+
+  @ApiPropertyOptional({
+    example: 1,
+    description: 'ID of the product to update',
+  })
+  @IsOptional()
+  @IsNumber()
+  productId?: number;
+
+  @ApiPropertyOptional({
+    example: 2,
+    description: 'Quantity of the product to update',
+  })
+  @IsOptional()
+  @IsNumber()
+  quantity?: number;
 }
