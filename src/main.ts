@@ -9,9 +9,10 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
   app.enableCors({
-    origin: '*',
+    origin: ['https://shopback.uniaffcrm.com', 'http://localhost:3000'],
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
     credentials: true,
+    optionsSuccessStatus: 204,
   });
 
   app.setGlobalPrefix(environment.app.prefix);
