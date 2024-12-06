@@ -7,7 +7,6 @@ import {
 import { environment } from '@src/environment';
 import { InjectEntityManager } from '@nestjs/typeorm';
 import { EntityManager, Repository } from 'typeorm';
-import { UpdateInvoiceDto } from '../dto/payment-update.dto';
 import { UserService } from '@src/modules/users/services/user.service';
 import { Payment } from '../entities/payment.entity';
 import { PaymentStatus } from '../enums/payment-status.enum';
@@ -81,16 +80,13 @@ export class PaymentService {
     }
   }
 
-  async handleInvoicePaid(
-    webhook: UpdateInvoiceDto,
-  ): Promise<InvoiceResponseDto | void> {
+  async handleInvoicePaid(webhook: any): Promise<InvoiceResponseDto | void> {
     try {
       if (webhook.update_type !== 'invoice_paid') {
         console.log('Ignored webhook: not an invoice_paid event');
         return;
       }
-      console.log('WEBHOOK :', webhook);
-      console.log('WEBHOOK PAYLOAD :', webhook.payload);
+      console.log('WEBHOOK PAYLOAD :', environment.app.env, webhook.payload);
 
       const webhookPayload = webhook.payload;
       const parsedPayload = JSON.parse(webhookPayload.payload);
