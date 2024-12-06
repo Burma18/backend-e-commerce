@@ -21,5 +21,7 @@ export const environment = {
     cryptoPayTokenProd: env.get('CRYPTO_PAY_TOKEN_PROD').required().asString(),
     hostNameTest: env.get('HOST_NAME_TEST').required().asString(),
     hostNameProd: env.get('HOST_NAME_PROD').required().asString(),
+    currencyTest: env.get('CURRENCY_TEST').required().asString(),
+    currencyProd: env.get('CURRENCY_PROD').required().asString(),
   },
 };

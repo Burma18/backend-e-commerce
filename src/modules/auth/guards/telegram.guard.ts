@@ -22,7 +22,6 @@ export class TelegramGuard implements CanActivate {
     ];
 
     if (excludedPaths.includes(request.url)) {
-      console.log('skipping guards');
       return true;
     }
 

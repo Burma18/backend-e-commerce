@@ -60,9 +60,14 @@ export class PaymentService {
 
     await this.paymentRepository.save(payment);
 
+    const currency =
+      environment.app.env === 'prod'
+        ? environment.payment.currencyProd
+        : environment.payment.currencyTest;
+
     try {
       const invoice: Invoice = await this.cryptoPay.createInvoice(
-        'USDT',
+        currency,
         amount,
         {
           description: 'Пополнение баланса',
@@ -84,6 +89,8 @@ export class PaymentService {
         console.log('Ignored webhook: not an invoice_paid event');
         return;
       }
+      console.log('WEBHOOK :', webhook);
+      console.log('WEBHOOK PAYLOAD :', webhook.payload);
 
       const webhookPayload = webhook.payload;
       const parsedPayload = JSON.parse(webhookPayload.payload);
@@ -96,6 +103,8 @@ export class PaymentService {
         parseFloat(webhookPayload.paid_amount) > 0
       ) {
         const amountPaid = parseFloat(webhookPayload.paid_amount);
+
+        console.log('amountPaid :', amountPaid);
 
         const payment = await this.paymentRepository.findOne({
           where: { id: paymentId },
