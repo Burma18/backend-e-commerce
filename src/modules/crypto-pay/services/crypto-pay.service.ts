@@ -86,7 +86,6 @@ export class PaymentService {
         console.log('Ignored webhook: not an invoice_paid event');
         return;
       }
-      console.log('WEBHOOK PAYLOAD :', environment.app.env, webhook.payload);
 
       const webhookPayload = webhook.payload;
       const parsedPayload = JSON.parse(webhookPayload.payload);
@@ -98,9 +97,7 @@ export class PaymentService {
         supportedAssets.includes(webhookPayload.paid_asset) &&
         parseFloat(webhookPayload.paid_amount) > 0
       ) {
-        const amountPaid = parseFloat(webhookPayload.paid_amount);
-
-        console.log('amountPaid :', amountPaid);
+        const amount = parseFloat(webhookPayload.amount);
 
         const payment = await this.paymentRepository.findOne({
           where: { id: paymentId },
@@ -112,6 +109,10 @@ export class PaymentService {
           return;
         }
 
+        if (payment.status === PaymentStatus.PAID) {
+          return;
+        }
+
         payment.status = PaymentStatus.PAID;
         payment.invoiceId = webhookPayload.invoice_id;
         payment.paymentUrl = webhookPayload.pay_url;
@@ -119,16 +120,15 @@ export class PaymentService {
         payment.currencyType = webhookPayload.currency_type;
         payment.paidAsset = webhookPayload.paid_asset;
         payment.feeAmount = parseFloat(webhookPayload.fee_amount);
-        payment.paidAmount = amountPaid;
+        payment.paidAmount = webhookPayload.paid_amount;
 
         await this.paymentRepository.save(payment);
 
         await this.paymentRepository.save(payment);
 
-        return await this.userService.addUserBalance(
-          payment.user.id,
-          amountPaid,
-        );
+        await this.userService.addUserBalance(payment.user.id, amount);
+
+        return;
       } else {
         console.error('Invalid payment currency or amount');
       }
