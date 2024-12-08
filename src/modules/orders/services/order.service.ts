@@ -102,6 +102,7 @@ export class OrderService {
       .leftJoinAndSelect('order.items', 'orderItem')
       .where('order.userId = :userId', { userId })
       .andWhere('orderItem.productId = :productId', { productId })
+      .andWhere('order.status = :status', { status: OrderStatus.PENDING })
       .getOne();
 
     if (existingOrder) {
